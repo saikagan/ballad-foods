@@ -30,7 +30,7 @@ export default function AppSidebar() {
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
         <div className="h-9 w-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
-          <UtensilsCrossed className="h-5 w-5 text-sidebar-primary-foreground" />
+          <PackageSearch className="h-5 w-5 text-sidebar-primary-foreground" />
         </div>
         <div>
           <h1 className="font-bold text-sm">Smart POS</h1>
