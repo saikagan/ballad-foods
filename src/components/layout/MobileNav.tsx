@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, ShoppingCart, UtensilsCrossed, Receipt, BarChart3 } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, PackageSearch, Receipt, BarChart3 } from "lucide-react";
 
 const mobileNav = [
   { icon: LayoutDashboard, path: "/", label: "Home" },

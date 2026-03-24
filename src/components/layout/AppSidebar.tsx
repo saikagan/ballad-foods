@@ -3,7 +3,7 @@ import { useAuth } from "@/lib/auth";
 import {
   LayoutDashboard,
   ShoppingCart,
-  UtensilsCrossed,
+  PackageSearch,
   Users,
   Receipt,
   BarChart3,
