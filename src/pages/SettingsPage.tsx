@@ -194,6 +194,9 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
+        {/* Industries */}
+        <IndustrySettings />
+
         {/* Payment / UPI */}
         <Card>
           <CardHeader>
