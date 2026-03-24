@@ -33,7 +33,7 @@ export default function AppSidebar() {
           <UtensilsCrossed className="h-5 w-5 text-sidebar-primary-foreground" />
         </div>
         <div>
-          <h1 className="font-bold text-sm">RestaurantPOS</h1>
+          <h1 className="font-bold text-sm">Smart POS</h1>
           <p className="text-xs text-sidebar-foreground/60">Business Suite</p>
         </div>
       </div>
