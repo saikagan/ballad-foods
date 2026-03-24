@@ -344,7 +344,17 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "cashier"
-      industry_type: "restaurant" | "retail" | "pharmacy"
+      industry_type:
+        | "restaurant"
+        | "retail"
+        | "pharmacy"
+        | "electronics"
+        | "grocery"
+        | "clothing"
+        | "hardware"
+        | "bakery"
+        | "salon"
+        | "other"
       order_status: "pending" | "completed" | "cancelled"
       payment_method: "cash" | "upi" | "card"
       payment_status: "pending" | "paid" | "refunded"
@@ -476,7 +486,18 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "cashier"],
-      industry_type: ["restaurant", "retail", "pharmacy"],
+      industry_type: [
+        "restaurant",
+        "retail",
+        "pharmacy",
+        "electronics",
+        "grocery",
+        "clothing",
+        "hardware",
+        "bakery",
+        "salon",
+        "other",
+      ],
       order_status: ["pending", "completed", "cancelled"],
       payment_method: ["cash", "upi", "card"],
       payment_status: ["pending", "paid", "refunded"],
