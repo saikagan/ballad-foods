@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { LogOut, Save, Users, Building2, CreditCard, Shield } from "lucide-react";
+import IndustrySettings from "@/components/settings/IndustrySettings";
 
 export default function SettingsPage() {
   const { orgId, roles, profile, user, signOut, hasRole } = useAuth();
