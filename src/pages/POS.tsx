@@ -164,6 +164,8 @@ export default function POS() {
         total={totals.total}
         onConfirm={handleCheckout}
         loading={checkoutLoading}
+        upiId={org?.upi_id}
+        orgName={org?.name}
       />
 
       <InvoiceActions
