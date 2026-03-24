@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Building2 } from "lucide-react";
 
 export default function Onboarding() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [orgName, setOrgName] = useState("");
   const [gstNumber, setGstNumber] = useState("");
