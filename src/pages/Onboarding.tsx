@@ -23,25 +23,25 @@ export default function Onboarding() {
     setLoading(true);
 
     try {
-      // Create organization
-      const { data: org, error: orgErr } = await supabase
+      const orgId = crypto.randomUUID();
+
+      // Create organization (don't chain .select() — SELECT RLS fails before profile is linked)
+      const { error: orgErr } = await supabase
         .from("organizations")
-        .insert({ name: orgName, industry: "restaurant" as const, gst_number: gstNumber || null, phone: phone || null })
-        .select()
-        .single();
+        .insert({ id: orgId, name: orgName, industry: "restaurant" as const, gst_number: gstNumber || null, phone: phone || null });
       if (orgErr) throw orgErr;
 
       // Link profile to org
       const { error: profileErr } = await supabase
         .from("profiles")
-        .update({ org_id: org.id })
+        .update({ org_id: orgId })
         .eq("user_id", user.id);
       if (profileErr) throw profileErr;
 
       // Assign admin role
       const { error: roleErr } = await supabase
         .from("user_roles")
-        .insert({ user_id: user.id, role: "admin" as const, org_id: org.id });
+        .insert({ user_id: user.id, role: "admin" as const, org_id: orgId });
       if (roleErr) throw roleErr;
 
       toast.success("Restaurant created!");
