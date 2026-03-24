@@ -3,7 +3,7 @@ import { useAuth } from "@/lib/auth";
 import {
   LayoutDashboard,
   ShoppingCart,
-  UtensilsCrossed,
+  PackageSearch,
   Users,
   Receipt,
   BarChart3,
@@ -14,7 +14,7 @@ import {
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
   { label: "POS", icon: ShoppingCart, path: "/pos" },
-  { label: "Menu", icon: UtensilsCrossed, path: "/menu" },
+  { label: "Inventory", icon: PackageSearch, path: "/menu" },
   { label: "Orders", icon: Receipt, path: "/orders" },
   { label: "Customers", icon: Users, path: "/customers" },
   { label: "Analytics", icon: BarChart3, path: "/analytics" },
@@ -30,7 +30,7 @@ export default function AppSidebar() {
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
         <div className="h-9 w-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
-          <UtensilsCrossed className="h-5 w-5 text-sidebar-primary-foreground" />
+          <PackageSearch className="h-5 w-5 text-sidebar-primary-foreground" />
         </div>
         <div>
           <h1 className="font-bold text-sm">Smart POS</h1>

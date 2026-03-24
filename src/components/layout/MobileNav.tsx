@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, ShoppingCart, UtensilsCrossed, Receipt, BarChart3 } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, PackageSearch, Receipt, BarChart3 } from "lucide-react";
 
 const mobileNav = [
   { icon: LayoutDashboard, path: "/", label: "Home" },
   { icon: ShoppingCart, path: "/pos", label: "POS" },
-  { icon: UtensilsCrossed, path: "/menu", label: "Menu" },
+  { icon: PackageSearch, path: "/menu", label: "Inventory" },
   { icon: Receipt, path: "/orders", label: "Orders" },
   { icon: BarChart3, path: "/analytics", label: "More" },
 ];
