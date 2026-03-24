@@ -21,6 +21,7 @@ export default function CartPanel({
   onCheckout,
   onClear,
   checkoutLoading,
+  customerSelector,
 }: CartPanelProps) {
   return (
     <div className="flex flex-col h-full bg-pos-cart rounded-xl border">
