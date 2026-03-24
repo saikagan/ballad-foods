@@ -9,14 +9,21 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plus, Search, Phone, Mail } from "lucide-react";
+import { Plus, Search, Phone, Mail, Pencil, Trash2 } from "lucide-react";
+
+interface CustomerForm {
+  name: string;
+  phone: string;
+  email: string;
+}
 
 export default function Customers() {
   const { orgId } = useAuth();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState({ name: "", phone: "", email: "" });
+  const [form, setForm] = useState<CustomerForm>({ name: "", phone: "", email: "" });
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers", orgId, search],
@@ -46,25 +53,65 @@ export default function Customers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
-      setDialogOpen(false);
-      setForm({ name: "", phone: "", email: "" });
+      closeDialog();
       toast.success("Customer added");
     },
     onError: (err: any) => toast.error(err.message),
   });
+
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      if (!editId) throw new Error("No customer selected");
+      const { error } = await supabase.from("customers").update({
+        name: form.name,
+        phone: form.phone || null,
+        email: form.email || null,
+      }).eq("id", editId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      closeDialog();
+      toast.success("Customer updated");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setEditId(null);
+    setForm({ name: "", phone: "", email: "" });
+  };
+
+  const openEdit = (customer: typeof customers[0]) => {
+    setEditId(customer.id);
+    setForm({ name: customer.name, phone: customer.phone || "", email: customer.email || "" });
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editId) {
+      updateMutation.mutate();
+    } else {
+      addMutation.mutate();
+    }
+  };
+
+  const isPending = addMutation.isPending || updateMutation.isPending;
 
   return (
     <AppLayout>
       <div className="p-4 md:p-6 max-w-5xl">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Customers</h1>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) closeDialog(); else setDialogOpen(true); }}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-2" />Add Customer</Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Add Customer</DialogTitle></DialogHeader>
-              <form onSubmit={(e) => { e.preventDefault(); addMutation.mutate(); }} className="space-y-4">
+              <DialogHeader><DialogTitle>{editId ? "Edit Customer" : "Add Customer"}</DialogTitle></DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Name *</Label>
                   <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -77,8 +124,8 @@ export default function Customers() {
                   <Label>Email</Label>
                   <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
                 </div>
-                <Button type="submit" className="w-full" disabled={addMutation.isPending}>
-                  {addMutation.isPending ? "Adding..." : "Add Customer"}
+                <Button type="submit" className="w-full" disabled={isPending}>
+                  {isPending ? "Saving..." : editId ? "Update Customer" : "Add Customer"}
                 </Button>
               </form>
             </DialogContent>
@@ -97,17 +144,22 @@ export default function Customers() {
         ) : (
           <div className="grid gap-2">
             {customers.map((c) => (
-              <Card key={c.id} className="flex items-center p-4 gap-4">
+              <Card
+                key={c.id}
+                className="flex items-center p-4 gap-4 cursor-pointer hover:bg-accent/50 transition-colors"
+                onClick={() => openEdit(c)}
+              >
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                   {c.name[0]?.toUpperCase()}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="font-medium">{c.name}</p>
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     {c.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{c.phone}</span>}
                     {c.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{c.email}</span>}
                   </div>
                 </div>
+                <Pencil className="h-4 w-4 text-muted-foreground shrink-0" />
               </Card>
             ))}
           </div>
