@@ -34,14 +34,14 @@ export default function Onboarding() {
       // Link profile to org
       const { error: profileErr } = await supabase
         .from("profiles")
-        .update({ org_id: org.id })
+        .update({ org_id: orgId })
         .eq("user_id", user.id);
       if (profileErr) throw profileErr;
 
       // Assign admin role
       const { error: roleErr } = await supabase
         .from("user_roles")
-        .insert({ user_id: user.id, role: "admin" as const, org_id: org.id });
+        .insert({ user_id: user.id, role: "admin" as const, org_id: orgId });
       if (roleErr) throw roleErr;
 
       toast.success("Restaurant created!");
