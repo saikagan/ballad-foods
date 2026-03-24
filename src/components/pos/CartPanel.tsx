@@ -10,6 +10,7 @@ interface CartPanelProps {
   onCheckout: () => void;
   onClear: () => void;
   checkoutLoading: boolean;
+  customerSelector?: React.ReactNode;
 }
 
 export default function CartPanel({
