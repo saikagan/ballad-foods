@@ -45,8 +45,8 @@ export default function Onboarding() {
       if (roleErr) throw roleErr;
 
       toast.success("Restaurant created!");
-      // Force a page reload so auth context refetches profile/roles
-      window.location.href = "/";
+      await refreshUser();
+      navigate("/");
     } catch (err: any) {
       toast.error(err.message || "Failed to create organization");
     } finally {
