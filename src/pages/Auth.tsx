@@ -46,7 +46,7 @@ export default function Auth() {
             {isLogin ? "Welcome back" : "Create account"}
           </CardTitle>
           <CardDescription>
-            {isLogin ? "Sign in to your POS dashboard" : "Set up your restaurant POS"}
+            {isLogin ? "Sign in to your Smart POS dashboard" : "Set up your Smart POS"}
           </CardDescription>
         </CardHeader>
         <CardContent>
