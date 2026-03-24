@@ -31,40 +31,62 @@ export default function Onboarding() {
   const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [orgName, setOrgName] = useState("");
-  const [industry, setIndustry] = useState<IndustryValue>("restaurant");
+  const [selectedIndustries, setSelectedIndustries] = useState<IndustryValue[]>(["restaurant"]);
   const [gstNumber, setGstNumber] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const toggleIndustry = (value: IndustryValue) => {
+    setSelectedIndustries((prev) =>
+      prev.includes(value)
+        ? prev.length > 1 ? prev.filter((v) => v !== value) : prev
+        : [...prev, value]
+    );
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || selectedIndustries.length === 0) return;
     setLoading(true);
 
     try {
       const orgId = crypto.randomUUID();
+      const primaryIndustry = selectedIndustries[0];
 
+      // 1. Create org with primary industry
       const { error: orgErr } = await supabase
         .from("organizations")
         .insert({
           id: orgId,
           name: orgName,
-          industry: industry as any,
+          industry: primaryIndustry as any,
           gst_number: gstNumber || null,
           phone: phone || null,
         });
       if (orgErr) throw orgErr;
 
+      // 2. Update profile with org_id
       const { error: profileErr } = await supabase
         .from("profiles")
         .update({ org_id: orgId })
         .eq("user_id", user.id);
       if (profileErr) throw profileErr;
 
+      // 3. Insert admin role
       const { error: roleErr } = await supabase
         .from("user_roles")
         .insert({ user_id: user.id, role: "admin" as const, org_id: orgId });
       if (roleErr) throw roleErr;
+
+      // 4. Insert all selected industries
+      const industryRows = selectedIndustries.map((ind) => ({
+        org_id: orgId,
+        industry: ind as any,
+      }));
+      const { error: indErr } = await supabase
+        .from("organization_industries")
+        .insert(industryRows);
+      if (indErr) throw indErr;
 
       toast.success("Business created!");
       await refreshUser();
@@ -76,8 +98,6 @@ export default function Onboarding() {
     }
   };
 
-  const selected = industries.find((i) => i.value === industry);
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-lg animate-scale-in">
@@ -86,22 +106,22 @@ export default function Onboarding() {
             <Building2 className="h-7 w-7 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl font-bold">Set up your business</CardTitle>
-          <CardDescription>Choose your industry and create your organization</CardDescription>
+          <CardDescription>Select your industries and create your organization</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreate} className="space-y-5">
-            {/* Industry Selection */}
+            {/* Industry Selection - Multi */}
             <div className="space-y-2">
-              <Label>Industry *</Label>
+              <Label>Industries * <span className="text-xs text-muted-foreground">(select one or more)</span></Label>
               <div className="grid grid-cols-5 gap-2">
                 {industries.map((ind) => {
                   const Icon = ind.icon;
-                  const isSelected = industry === ind.value;
+                  const isSelected = selectedIndustries.includes(ind.value);
                   return (
                     <button
                       key={ind.value}
                       type="button"
-                      onClick={() => setIndustry(ind.value)}
+                      onClick={() => toggleIndustry(ind.value)}
                       className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-center ${
                         isSelected
                           ? "border-primary bg-primary/10 text-primary"
@@ -122,7 +142,7 @@ export default function Onboarding() {
                 id="orgName"
                 value={orgName}
                 onChange={(e) => setOrgName(e.target.value)}
-                placeholder={`My ${selected?.label || "Business"}`}
+                placeholder="My Business"
                 required
               />
             </div>
@@ -146,8 +166,8 @@ export default function Onboarding() {
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading}>
-              {loading ? "Creating..." : `Create ${selected?.label || "Business"}`}
+            <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading || selectedIndustries.length === 0}>
+              {loading ? "Creating..." : "Create Business"}
             </Button>
           </form>
         </CardContent>

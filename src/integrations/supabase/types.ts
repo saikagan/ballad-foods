@@ -219,6 +219,32 @@ export type Database = {
           },
         ]
       }
+      organization_industries: {
+        Row: {
+          id: string
+          industry: Database["public"]["Enums"]["industry_type"]
+          org_id: string
+        }
+        Insert: {
+          id?: string
+          industry: Database["public"]["Enums"]["industry_type"]
+          org_id: string
+        }
+        Update: {
+          id?: string
+          industry?: Database["public"]["Enums"]["industry_type"]
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_industries_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address: string | null
