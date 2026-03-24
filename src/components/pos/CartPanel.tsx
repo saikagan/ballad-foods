@@ -10,6 +10,7 @@ interface CartPanelProps {
   onCheckout: () => void;
   onClear: () => void;
   checkoutLoading: boolean;
+  customerSelector?: React.ReactNode;
 }
 
 export default function CartPanel({
@@ -20,9 +21,13 @@ export default function CartPanel({
   onCheckout,
   onClear,
   checkoutLoading,
+  customerSelector,
 }: CartPanelProps) {
   return (
     <div className="flex flex-col h-full bg-pos-cart rounded-xl border">
+      {/* Customer Selector */}
+      {customerSelector && <div className="p-4 pb-0">{customerSelector}</div>}
+
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
