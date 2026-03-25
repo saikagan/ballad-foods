@@ -8,6 +8,7 @@ import CartPanel from "@/components/pos/CartPanel";
 import CustomerSelector, { SelectedCustomer } from "@/components/pos/CustomerSelector";
 import CheckoutDialog from "@/components/pos/CheckoutDialog";
 import InvoiceActions from "@/components/pos/InvoiceActions";
+import MobileCartSheet from "@/components/pos/MobileCartSheet";
 import AppLayout from "@/components/layout/AppLayout";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
