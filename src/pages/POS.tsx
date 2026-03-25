@@ -145,18 +145,19 @@ export default function POS() {
           />
         </div>
 
-        {/* Mobile Cart Button */}
-        {items.length > 0 && (
-          <div className="md:hidden fixed bottom-16 inset-x-0 p-4">
-            <button
-              onClick={() => setCheckoutOpen(true)}
-              disabled={checkoutLoading}
-              className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold text-base shadow-lg flex items-center justify-center gap-2"
-            >
-              {checkoutLoading ? "Processing..." : `Charge ₹${totals.total.toFixed(0)} (${items.length} items)`}
-            </button>
-          </div>
-        )}
+        {/* Mobile Cart Sheet */}
+        <MobileCartSheet
+          items={items}
+          totals={totals}
+          onUpdateQuantity={updateQuantity}
+          onRemoveItem={removeItem}
+          onCheckout={() => setCheckoutOpen(true)}
+          onClear={clearCart}
+          checkoutLoading={checkoutLoading}
+          customerSelector={
+            <CustomerSelector selected={selectedCustomer} onSelect={setSelectedCustomer} />
+          }
+        />
       </div>
 
       <CheckoutDialog
