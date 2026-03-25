@@ -24,7 +24,7 @@ export default function CartPanel({
   customerSelector,
 }: CartPanelProps) {
   return (
-    <div className="flex flex-col h-full bg-pos-cart rounded-xl border">
+    <div className="flex flex-col h-full bg-pos-cart rounded-xl border md:border md:rounded-xl border-0 rounded-none">
       {/* Customer Selector */}
       {customerSelector && <div className="p-4 pb-0">{customerSelector}</div>}
 
