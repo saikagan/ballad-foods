@@ -18,7 +18,7 @@ interface AuthState {
 }
 
 interface AuthContextType extends AuthState {
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, orgName?: string, industries?: string[]) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
