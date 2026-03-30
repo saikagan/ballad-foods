@@ -21,7 +21,7 @@ export default function Menu() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ name: "", price: "", category: "Main Course", gst_rate: "5", is_available: true });
-  const canEdit = hasRole("admin") || hasRole("manager") || hasRole("cashier");
+  const canEdit = hasRole("admin") || hasRole("manager");
 
   const { data: items = [] } = useQuery({
     queryKey: ["menu_items", orgId],
