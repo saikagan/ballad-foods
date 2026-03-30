@@ -195,6 +195,9 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
+        {/* Organizations */}
+        <OrgMemberships />
+
         {/* Industries */}
         <IndustrySettings />
 
