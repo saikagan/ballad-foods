@@ -54,7 +54,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const profile = profileRes.data;
     const rolesData = rolesRes.data || [];
-    const roles = rolesData.filter((r) => r.org_id === profile?.org_id).map((r) => r.role);
+    // Filter roles for active org; if none found, use all roles (backward compat)
+    const orgRoles = rolesData.filter((r) => r.org_id === profile?.org_id);
+    const roles = (orgRoles.length > 0 ? orgRoles : rolesData).map((r) => r.role);
 
     // Fetch org names for all user orgs
     const orgIds = [...new Set(rolesData.map((r) => r.org_id))];
