@@ -14,7 +14,7 @@ import { LogOut, Save, Users, Building2, CreditCard, Shield, Pencil, X, Check } 
 import IndustrySettings from "@/components/settings/IndustrySettings";
 
 export default function SettingsPage() {
-  const { orgId, roles, profile, user, signOut, hasRole } = useAuth();
+  const { orgId, roles, profile, user, signOut, hasRole, refreshUser } = useAuth();
   const queryClient = useQueryClient();
   const isAdmin = hasRole("admin");
 
