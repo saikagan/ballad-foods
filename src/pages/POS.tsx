@@ -153,7 +153,13 @@ export default function POS() {
             totals={totals}
             onUpdateQuantity={updateQuantity}
             onRemoveItem={removeItem}
-            onCheckout={() => setCheckoutOpen(true)}
+            onCheckout={() => {
+              if (!selectedCustomer) {
+                toast.error("Please select or add a customer before checkout");
+                return;
+              }
+              setCheckoutOpen(true);
+            }}
             onClear={clearCart}
             checkoutLoading={checkoutLoading}
             customerSelector={
@@ -168,7 +174,13 @@ export default function POS() {
           totals={totals}
           onUpdateQuantity={updateQuantity}
           onRemoveItem={removeItem}
-          onCheckout={() => setCheckoutOpen(true)}
+            onCheckout={() => {
+              if (!selectedCustomer) {
+                toast.error("Please select or add a customer before checkout");
+                return;
+              }
+              setCheckoutOpen(true);
+            }}
           onClear={clearCart}
           checkoutLoading={checkoutLoading}
           customerSelector={

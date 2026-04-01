@@ -56,6 +56,10 @@ export default function CustomerSelector({ selected, onSelect }: CustomerSelecto
   const handleAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!orgId) return;
+    if (!form.phone.trim()) {
+      toast.error("Phone number is required");
+      return;
+    }
     setSaving(true);
     try {
       const { data, error } = await supabase
@@ -153,8 +157,8 @@ export default function CustomerSelector({ selected, onSelect }: CustomerSelecto
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div className="space-y-2">
-              <Label>Phone</Label>
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+91 98765 43210" />
+              <Label>Phone *</Label>
+              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+91 98765 43210" required />
             </div>
             <div className="space-y-2">
               <Label>Email</Label>
