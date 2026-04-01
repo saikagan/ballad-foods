@@ -93,6 +93,31 @@ export default function SettingsPage() {
     enabled: !!orgId,
   });
 
+  // Profile name editing
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState("");
+
+  useEffect(() => {
+    if (profile?.full_name) setNameValue(profile.full_name);
+  }, [profile?.full_name]);
+
+  const updateName = useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: nameValue.trim() || null })
+        .eq("user_id", user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refreshUser();
+      setEditingName(false);
+      toast.success("Name updated");
+    },
+    onError: (err: any) => toast.error(err.message || "Update failed"),
+  });
+
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out");
