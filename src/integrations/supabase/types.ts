@@ -367,6 +367,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      search_organizations: {
+        Args: { _query: string }
+        Returns: {
+          id: string
+          industry: Database["public"]["Enums"]["industry_type"]
+          name: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "manager" | "cashier"
