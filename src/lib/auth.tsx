@@ -5,12 +5,6 @@ import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
-interface UserOrg {
-  id: string;
-  name: string;
-  role: AppRole;
-}
-
 interface AuthState {
   session: Session | null;
   user: User | null;
@@ -21,16 +15,14 @@ interface AuthState {
   roles: AppRole[];
   loading: boolean;
   orgId: string | null;
-  userOrgs: UserOrg[];
 }
 
 interface AuthContextType extends AuthState {
-  signUp: (email: string, password: string, fullName: string, orgName?: string, industries?: string[], joinOrgId?: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, orgName?: string, industries?: string[]) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
   refreshUser: () => Promise<void>;
-  switchOrg: (orgId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -43,50 +35,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     roles: [],
     loading: true,
     orgId: null,
-    userOrgs: [],
   });
 
   const fetchUserData = async (userId: string) => {
     const [profileRes, rolesRes] = await Promise.all([
       supabase.from("profiles").select("full_name, org_id").eq("user_id", userId).maybeSingle(),
-      supabase.from("user_roles").select("role, org_id").eq("user_id", userId),
+      supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
 
     const profile = profileRes.data;
-    const rolesData = rolesRes.data || [];
-    // Filter roles for active org; if none found, use all roles (backward compat)
-    const orgRoles = rolesData.filter((r) => r.org_id === profile?.org_id);
-    const roles = (orgRoles.length > 0 ? orgRoles : rolesData).map((r) => r.role);
-
-    // Fetch org names for all user orgs
-    const orgIds = [...new Set(rolesData.map((r) => r.org_id))];
-    let userOrgs: UserOrg[] = [];
-    if (orgIds.length > 0) {
-      const { data: orgs } = await supabase
-        .from("organizations")
-        .select("id, name")
-        .in("id", orgIds);
-      const orgMap = new Map((orgs || []).map((o) => [o.id, o.name]));
-      userOrgs = rolesData.map((r) => ({
-        id: r.org_id,
-        name: orgMap.get(r.org_id) || "Unknown",
-        role: r.role,
-      }));
-      // Deduplicate by org_id (take first role)
-      const seen = new Set<string>();
-      userOrgs = userOrgs.filter((o) => {
-        if (seen.has(o.id)) return false;
-        seen.add(o.id);
-        return true;
-      });
-    }
+    const roles = (rolesRes.data || []).map((r) => r.role);
 
     setState((prev) => ({
       ...prev,
       profile,
       roles,
       orgId: profile?.org_id || null,
-      userOrgs,
       loading: false,
     }));
   };
@@ -98,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           setTimeout(() => fetchUserData(session.user.id), 0);
         } else {
-          setState((prev) => ({ ...prev, profile: null, roles: [], orgId: null, userOrgs: [], loading: false }));
+          setState((prev) => ({ ...prev, profile: null, roles: [], orgId: null, loading: false }));
         }
       }
     );
@@ -115,14 +79,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, orgName?: string, industries?: string[], joinOrgId?: string) => {
+  const signUp = async (email: string, password: string, fullName: string, orgName?: string, industries?: string[]) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name: fullName,
-          ...(joinOrgId ? { join_org_id: joinOrgId } : {}),
           ...(orgName ? { org_name: orgName } : {}),
           ...(industries && industries.length > 0 ? { industries } : {}),
         },
@@ -142,16 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hasRole = (role: AppRole) => state.roles.includes(role);
 
-  const switchOrg = async (newOrgId: string) => {
-    if (!state.user) return;
-    const { error } = await supabase
-      .from("profiles")
-      .update({ org_id: newOrgId })
-      .eq("user_id", state.user.id);
-    if (error) throw error;
-    await fetchUserData(state.user.id);
-  };
-
   const refreshUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
@@ -160,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ ...state, signUp, signIn, signOut, hasRole, refreshUser, switchOrg }}>
+    <AuthContext.Provider value={{ ...state, signUp, signIn, signOut, hasRole, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

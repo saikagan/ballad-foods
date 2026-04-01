@@ -12,7 +12,6 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { LogOut, Save, Users, Building2, CreditCard, Shield } from "lucide-react";
 import IndustrySettings from "@/components/settings/IndustrySettings";
-import OrgMemberships from "@/components/settings/OrgMemberships";
 
 export default function SettingsPage() {
   const { orgId, roles, profile, user, signOut, hasRole } = useAuth();
@@ -194,9 +193,6 @@ export default function SettingsPage() {
             )}
           </CardContent>
         </Card>
-
-        {/* Organizations */}
-        <OrgMemberships />
 
         {/* Industries */}
         <IndustrySettings />
