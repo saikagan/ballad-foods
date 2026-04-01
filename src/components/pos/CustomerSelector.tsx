@@ -157,7 +157,7 @@ export default function CustomerSelector({ selected, onSelect }: CustomerSelecto
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div className="space-y-2">
-              <Label>Phone</Label>
+              <Label>Phone *</Label>
               <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+91 98765 43210" required />
             </div>
             <div className="space-y-2">
