@@ -56,6 +56,10 @@ export default function CustomerSelector({ selected, onSelect }: CustomerSelecto
   const handleAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!orgId) return;
+    if (!form.phone.trim()) {
+      toast.error("Phone number is required");
+      return;
+    }
     setSaving(true);
     try {
       const { data, error } = await supabase
