@@ -40,7 +40,24 @@ export default function POS() {
     setCheckoutLoading(true);
 
     try {
-      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
+      // Generate ORD-001-DDMMYYYY format, resetting count daily
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      const dateStr = `${dd}${mm}${yyyy}`;
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
+
+      const { count } = await supabase
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId)
+        .gte("created_at", startOfDay)
+        .lt("created_at", endOfDay);
+
+      const seq = String((count ?? 0) + 1).padStart(3, '0');
+      const orderNumber = `ORD-${seq}-${dateStr}`;
 
       const { data: order, error: orderErr } = await supabase
         .from("orders")
