@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -10,11 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { LogOut, Save, Users, Building2, CreditCard, Shield } from "lucide-react";
+import { LogOut, Save, Users, Building2, CreditCard, Shield, Pencil, X, Check } from "lucide-react";
 import IndustrySettings from "@/components/settings/IndustrySettings";
 
 export default function SettingsPage() {
-  const { orgId, roles, profile, user, signOut, hasRole } = useAuth();
+  const { orgId, roles, profile, user, signOut, hasRole, refreshUser } = useAuth();
   const queryClient = useQueryClient();
   const isAdmin = hasRole("admin");
 
@@ -91,6 +91,31 @@ export default function SettingsPage() {
       }));
     },
     enabled: !!orgId,
+  });
+
+  // Profile name editing
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState("");
+
+  useEffect(() => {
+    if (profile?.full_name) setNameValue(profile.full_name);
+  }, [profile?.full_name]);
+
+  const updateName = useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: nameValue.trim() || null })
+        .eq("user_id", user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      refreshUser();
+      setEditingName(false);
+      toast.success("Name updated");
+    },
+    onError: (err: any) => toast.error(err.message || "Update failed"),
   });
 
   const handleSignOut = async () => {
@@ -245,9 +270,31 @@ export default function SettingsPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Name</span>
-              <span className="font-medium">{profile?.full_name || "—"}</span>
+              {editingName ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={nameValue}
+                    onChange={(e) => setNameValue(e.target.value)}
+                    className="h-8 w-48 text-sm"
+                    autoFocus
+                  />
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => updateName.mutate()} disabled={updateName.isPending}>
+                    <Check className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setEditingName(false); setNameValue(profile?.full_name || ""); }}>
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{profile?.full_name || "—"}</span>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditingName(true)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Email</span>
