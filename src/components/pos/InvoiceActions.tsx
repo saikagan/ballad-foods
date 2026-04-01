@@ -26,8 +26,8 @@ export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceAc
     const message = buildShareMessage(invoiceData);
     const phone = invoiceData.customerPhone?.replace(/\D/g, "") || "";
     const url = phone
-      ? `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`
-      : `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   };
 
