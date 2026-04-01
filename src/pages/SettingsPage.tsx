@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { LogOut, Save, Users, Building2, CreditCard, Shield } from "lucide-react";
+import { LogOut, Save, Users, Building2, CreditCard, Shield, Pencil, X, Check } from "lucide-react";
 import IndustrySettings from "@/components/settings/IndustrySettings";
 
 export default function SettingsPage() {
