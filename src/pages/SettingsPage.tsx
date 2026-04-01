@@ -270,9 +270,31 @@ export default function SettingsPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Name</span>
-              <span className="font-medium">{profile?.full_name || "—"}</span>
+              {editingName ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={nameValue}
+                    onChange={(e) => setNameValue(e.target.value)}
+                    className="h-8 w-48 text-sm"
+                    autoFocus
+                  />
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => updateName.mutate()} disabled={updateName.isPending}>
+                    <Check className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setEditingName(false); setNameValue(profile?.full_name || ""); }}>
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{profile?.full_name || "—"}</span>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditingName(true)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Email</span>
