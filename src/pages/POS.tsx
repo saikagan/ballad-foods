@@ -13,6 +13,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 import type { InvoiceData } from "@/lib/generateInvoice";
+import { generateInvoiceHTML } from "@/lib/generateInvoice";
 
 type PaymentMethod = Database["public"]["Enums"]["payment_method"];
 
