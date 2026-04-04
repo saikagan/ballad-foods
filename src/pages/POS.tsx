@@ -125,6 +125,22 @@ export default function POS() {
         paymentMethod: paymentMethod,
       };
 
+      // Upload invoice HTML to storage
+      try {
+        const invoiceHtml = generateInvoiceHTML(invoice);
+        const blob = new Blob([invoiceHtml], { type: "text/html" });
+        const filePath = `${orgId}/${order.id}.html`;
+        const { error: uploadErr } = await supabase.storage
+          .from("invoices")
+          .upload(filePath, blob, { contentType: "text/html", upsert: true });
+        if (!uploadErr) {
+          const { data: urlData } = supabase.storage.from("invoices").getPublicUrl(filePath);
+          await supabase.from("orders").update({ invoice_url: urlData.publicUrl }).eq("id", order.id);
+        }
+      } catch (e) {
+        console.error("Invoice upload failed", e);
+      }
+
       clearCart();
       setSelectedCustomer(null);
       setCheckoutOpen(false);
