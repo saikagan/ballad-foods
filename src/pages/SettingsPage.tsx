@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { LogOut, Save, Users, Building2, CreditCard, Shield, Pencil, X, Check } from "lucide-react";
 import IndustrySettings from "@/components/settings/IndustrySettings";
+import CreateUserDialog from "@/components/settings/CreateUserDialog";
 
 export default function SettingsPage() {
   const { orgId, roles, profile, user, signOut, hasRole, refreshUser } = useAuth();
@@ -314,12 +315,17 @@ export default function SettingsPage() {
         {/* Team Members */}
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              <div>
-                <CardTitle className="text-base">Team Members</CardTitle>
-                <CardDescription>{members?.length || 0} members in your organization</CardDescription>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <div>
+                  <CardTitle className="text-base">Team Members</CardTitle>
+                  <CardDescription>{members?.length || 0} members in your organization</CardDescription>
+                </div>
               </div>
+              {isAdmin && (
+                <CreateUserDialog onCreated={() => queryClient.invalidateQueries({ queryKey: ["team", orgId] })} />
+              )}
             </div>
           </CardHeader>
           <CardContent>
