@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { LogOut, Save, Users, Building2, CreditCard, Shield, Pencil, X, Check } from "lucide-react";
 import IndustrySettings from "@/components/settings/IndustrySettings";
+import CreateUserDialog from "@/components/settings/CreateUserDialog";
 
 export default function SettingsPage() {
   const { orgId, roles, profile, user, signOut, hasRole, refreshUser } = useAuth();
