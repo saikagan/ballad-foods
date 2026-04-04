@@ -13,6 +13,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 import type { InvoiceData } from "@/lib/generateInvoice";
+import { generateInvoiceHTML } from "@/lib/generateInvoice";
 
 type PaymentMethod = Database["public"]["Enums"]["payment_method"];
 
@@ -123,6 +124,22 @@ export default function POS() {
         total: totals.total,
         paymentMethod: paymentMethod,
       };
+
+      // Upload invoice HTML to storage
+      try {
+        const invoiceHtml = generateInvoiceHTML(invoice);
+        const blob = new Blob([invoiceHtml], { type: "text/html" });
+        const filePath = `${orgId}/${order.id}.html`;
+        const { error: uploadErr } = await supabase.storage
+          .from("invoices")
+          .upload(filePath, blob, { contentType: "text/html", upsert: true });
+        if (!uploadErr) {
+          const { data: urlData } = supabase.storage.from("invoices").getPublicUrl(filePath);
+          await supabase.from("orders").update({ invoice_url: urlData.publicUrl }).eq("id", order.id);
+        }
+      } catch (e) {
+        console.error("Invoice upload failed", e);
+      }
 
       clearCart();
       setSelectedCustomer(null);

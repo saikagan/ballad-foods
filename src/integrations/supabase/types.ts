@@ -157,6 +157,7 @@ export type Database = {
           created_by: string | null
           customer_id: string | null
           id: string
+          invoice_url: string | null
           notes: string | null
           order_number: string
           org_id: string
@@ -174,6 +175,7 @@ export type Database = {
           created_by?: string | null
           customer_id?: string | null
           id?: string
+          invoice_url?: string | null
           notes?: string | null
           order_number: string
           org_id: string
@@ -191,6 +193,7 @@ export type Database = {
           created_by?: string | null
           customer_id?: string | null
           id?: string
+          invoice_url?: string | null
           notes?: string | null
           order_number?: string
           org_id?: string

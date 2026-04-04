@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/auth";
 import AppLayout from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Orders() {
@@ -65,10 +67,20 @@ export default function Orders() {
                     ))}
                   </div>
                 )}
-                <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                   <span>Subtotal: ₹{Number(order.subtotal).toFixed(2)}</span>
                   <span>CGST: ₹{Number(order.cgst).toFixed(2)}</span>
                   <span>SGST: ₹{Number(order.sgst).toFixed(2)}</span>
+                  {(order as any).invoice_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="ml-auto h-7 gap-1.5 text-xs"
+                      onClick={() => window.open((order as any).invoice_url, "_blank")}
+                    >
+                      <FileText className="h-3.5 w-3.5" /> View Invoice
+                    </Button>
+                  )}
                 </div>
               </Card>
             ))}
