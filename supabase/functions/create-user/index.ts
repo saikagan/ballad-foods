@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
     const { data: isAdmin } = await adminClient.rpc("has_role", {
       _user_id: callerUserId,
       _role: "admin",
+      _org_id: callerOrgId,
     });
     if (!isAdmin) {
       return new Response(JSON.stringify({ error: "Only admins can create users" }), {
