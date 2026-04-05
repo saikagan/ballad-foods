@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 export default function Orders() {
   const { orgId } = useAuth();
@@ -76,7 +77,19 @@ export default function Orders() {
                       variant="outline"
                       size="sm"
                       className="ml-auto h-7 gap-1.5 text-xs"
-                      onClick={() => window.open((order as any).invoice_url, "_blank")}
+                      onClick={async () => {
+                        try {
+                          const res = await fetch((order as any).invoice_url);
+                          const html = await res.text();
+                          const w = window.open("", "_blank", "width=800,height=900");
+                          if (w) {
+                            w.document.write(html);
+                            w.document.close();
+                          }
+                        } catch {
+                          toast.error("Failed to load invoice");
+                        }
+                      }}
                     >
                       <FileText className="h-3.5 w-3.5" /> View Invoice
                     </Button>
