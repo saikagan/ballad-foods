@@ -72,33 +72,28 @@ export default function Orders() {
                   <span>Subtotal: ₹{Number(order.subtotal).toFixed(2)}</span>
                   <span>CGST: ₹{Number(order.cgst).toFixed(2)}</span>
                   <span>SGST: ₹{Number(order.sgst).toFixed(2)}</span>
-                    {order.invoice_url && (
-                     <Button
-                       variant="outline"
-                       size="sm"
-                       className="ml-auto h-7 gap-1.5 text-xs"
-                       onClick={async () => {
-                         try {
-                           // Generate a short-lived signed URL for the private bucket
-                           const { data: signedData, error: signedErr } = await supabase.storage
-                             .from("invoices")
-                             .createSignedUrl(order.invoice_url!, 60);
-                           if (signedErr || !signedData?.signedUrl) throw signedErr || new Error("No URL");
-                           const res = await fetch(signedData.signedUrl);
-                           const html = await res.text();
-                           const w = window.open("", "_blank", "width=800,height=900");
-                           if (w) {
-                             w.document.write(html);
-                             w.document.close();
-                           }
-                         } catch {
-                           toast.error("Failed to load invoice");
-                         }
-                       }}
-                     >
-                       <FileText className="h-3.5 w-3.5" /> View Invoice
-                     </Button>
-                   )}
+                  {(order as any).invoice_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="ml-auto h-7 gap-1.5 text-xs"
+                      onClick={async () => {
+                        try {
+                          const res = await fetch((order as any).invoice_url);
+                          const html = await res.text();
+                          const w = window.open("", "_blank", "width=800,height=900");
+                          if (w) {
+                            w.document.write(html);
+                            w.document.close();
+                          }
+                        } catch {
+                          toast.error("Failed to load invoice");
+                        }
+                      }}
+                    >
+                      <FileText className="h-3.5 w-3.5" /> View Invoice
+                    </Button>
+                  )}
                 </div>
               </Card>
             ))}
