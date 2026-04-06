@@ -134,8 +134,8 @@ export default function POS() {
           .from("invoices")
           .upload(filePath, blob, { contentType: "text/html", upsert: true });
         if (!uploadErr) {
-          const { data: urlData } = supabase.storage.from("invoices").getPublicUrl(filePath);
-          await supabase.from("orders").update({ invoice_url: urlData.publicUrl }).eq("id", order.id);
+          // Store the storage path (not a public URL) since bucket is private
+          await supabase.from("orders").update({ invoice_url: filePath }).eq("id", order.id);
         }
       } catch (e) {
         console.error("Invoice upload failed", e);
