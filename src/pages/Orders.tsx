@@ -72,14 +72,18 @@ export default function Orders() {
                   <span>Subtotal: ₹{Number(order.subtotal).toFixed(2)}</span>
                   <span>CGST: ₹{Number(order.cgst).toFixed(2)}</span>
                   <span>SGST: ₹{Number(order.sgst).toFixed(2)}</span>
-                  {(order as any).invoice_url && (
+                  {order.invoice_url && (
                     <Button
                       variant="outline"
                       size="sm"
                       className="ml-auto h-7 gap-1.5 text-xs"
                       onClick={async () => {
                         try {
-                          const res = await fetch((order as any).invoice_url);
+                          const { data, error } = await supabase.storage
+                            .from("invoices")
+                            .createSignedUrl(order.invoice_url!, 60);
+                          if (error || !data?.signedUrl) throw error || new Error("No URL");
+                          const res = await fetch(data.signedUrl);
                           const html = await res.text();
                           const w = window.open("", "_blank", "width=800,height=900");
                           if (w) {
