@@ -53,40 +53,15 @@ export default function Onboarding() {
       const orgId = crypto.randomUUID();
       const primaryIndustry = selectedIndustries[0];
 
-      // 1. Create org with primary industry
-      const { error: orgErr } = await supabase
-        .from("organizations")
-        .insert({
-          id: orgId,
-          name: orgName,
-          industry: primaryIndustry as any,
-          gst_number: gstNumber || null,
-          phone: phone || null,
-        });
-      if (orgErr) throw orgErr;
-
-      // 2. Update profile with org_id
-      const { error: profileErr } = await supabase
-        .from("profiles")
-        .update({ org_id: orgId })
-        .eq("user_id", user.id);
-      if (profileErr) throw profileErr;
-
-      // 3. Insert admin role
-      const { error: roleErr } = await supabase
-        .from("user_roles")
-        .insert({ user_id: user.id, role: "admin" as const, org_id: orgId });
-      if (roleErr) throw roleErr;
-
-      // 4. Insert all selected industries
-      const industryRows = selectedIndustries.map((ind) => ({
-        org_id: orgId,
-        industry: ind as any,
-      }));
-      const { error: indErr } = await supabase
-        .from("organization_industries")
-        .insert(industryRows);
-      if (indErr) throw indErr;
+      const { error } = await supabase.rpc("setup_onboarding", {
+        _org_id: orgId,
+        _org_name: orgName,
+        _industry: primaryIndustry,
+        _gst_number: gstNumber || null,
+        _phone: phone || null,
+        _industries: selectedIndustries,
+      });
+      if (error) throw error;
 
       toast.success("Business created!");
       await refreshUser();
