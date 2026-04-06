@@ -4,7 +4,7 @@ import { LayoutDashboard, ShoppingCart, PackageSearch, Receipt, BarChart3 } from
 const mobileNav = [
   { icon: LayoutDashboard, path: "/", label: "Home" },
   { icon: ShoppingCart, path: "/pos", label: "POS" },
-  { icon: PackageSearch, path: "/menu", label: "Inventory" },
+  { icon: PackageSearch, path: "/menu", label: "Menu Items" },
   { icon: Receipt, path: "/orders", label: "Orders" },
   { icon: BarChart3, path: "/analytics", label: "More" },
 ];

@@ -14,7 +14,7 @@ import {
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
   { label: "POS", icon: ShoppingCart, path: "/pos" },
-  { label: "Inventory", icon: PackageSearch, path: "/menu" },
+  { label: "Menu Items", icon: PackageSearch, path: "/menu" },
   { label: "Orders", icon: Receipt, path: "/orders" },
   { label: "Customers", icon: Users, path: "/customers" },
   { label: "Analytics", icon: BarChart3, path: "/analytics" },
