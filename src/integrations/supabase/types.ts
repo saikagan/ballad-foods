@@ -107,7 +107,7 @@ export type Database = {
           gst_rate: number
           id: string
           item_name: string
-          menu_item_id: string
+          menu_item_id: string | null
           order_id: string
           quantity: number
           total: number
@@ -117,7 +117,7 @@ export type Database = {
           gst_rate?: number
           id?: string
           item_name: string
-          menu_item_id: string
+          menu_item_id?: string | null
           order_id: string
           quantity?: number
           total: number
@@ -127,7 +127,7 @@ export type Database = {
           gst_rate?: number
           id?: string
           item_name?: string
-          menu_item_id?: string
+          menu_item_id?: string | null
           order_id?: string
           quantity?: number
           total?: number
