@@ -126,7 +126,7 @@ export default function POS() {
         paymentMethod: paymentMethod,
       };
 
-      // Upload invoice HTML to storage
+      let storedPath: string | null = null;
       try {
         const invoiceHtml = generateInvoiceHTML(invoice);
         const blob = new Blob([invoiceHtml], { type: "text/html" });
@@ -135,7 +135,7 @@ export default function POS() {
           .from("invoices")
           .upload(filePath, blob, { contentType: "text/html", upsert: true });
         if (!uploadErr) {
-          // Store the storage path (not a public URL) since bucket is private
+          storedPath = filePath;
           await supabase.from("orders").update({ invoice_url: filePath }).eq("id", order.id);
         }
       } catch (e) {
