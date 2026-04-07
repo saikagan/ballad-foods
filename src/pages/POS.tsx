@@ -25,6 +25,7 @@ export default function POS() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [invoiceStoragePath, setInvoiceStoragePath] = useState<string | null>(null);
 
   const { data: org } = useQuery({
     queryKey: ["org", orgId],
