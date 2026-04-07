@@ -45,29 +45,13 @@ export default function Orders() {
 
   const markDone = useMutation({
     mutationFn: async (order: (typeof orders)[0]) => {
-      // Build invoice link if available
-      let invoiceUrl = "";
-      if (order.invoice_url) {
-        try {
-          const { data } = await supabase.storage
-            .from("invoices")
-            .createSignedUrl(order.invoice_url, 604800); // 7-day link
-          if (data?.signedUrl) invoiceUrl = data.signedUrl;
-        } catch (e) {
-          console.error("Failed to generate invoice URL", e);
-        }
-      }
-
-      // Send WhatsApp message with invoice
+      // Send WhatsApp message
       const phone = order.customers?.phone?.replace(/\D/g, "");
       if (phone) {
-        const lines = [
-          `Thank you for your order *${order.order_number}*!`,
-          `Amount: ₹${Number(order.total).toFixed(0)}`,
-          invoiceUrl ? `\nView your invoice: ${invoiceUrl}` : "",
-          `\nPlease rate us: ${window.location.origin}/survey/${order.id}`,
-        ].filter(Boolean).join("\n");
-        const message = encodeURIComponent(lines);
+        const surveyLink = `${window.location.origin}/survey/${order.id}`;
+        const message = encodeURIComponent(
+          `Thank you for your order! Please rate us: ${surveyLink}`
+        );
         window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
       }
 
