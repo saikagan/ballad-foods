@@ -1,16 +1,22 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Printer, MessageCircle, Mail, X, Check } from "lucide-react";
+import { Printer, MessageCircle, Mail, Check, Loader2 } from "lucide-react";
 import type { InvoiceData } from "@/lib/generateInvoice";
 import { openInvoicePrintWindow } from "@/lib/generateInvoice";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface InvoiceActionsProps {
   open: boolean;
   onClose: () => void;
   invoiceData: InvoiceData | null;
+  invoiceStoragePath?: string | null;
 }
 
-export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceActionsProps) {
+export default function InvoiceActions({ open, onClose, invoiceData, invoiceStoragePath }: InvoiceActionsProps) {
+  const [sharing, setSharing] = useState(false);
+
   if (!invoiceData) return null;
 
   const handlePrint = () => {
@@ -22,13 +28,30 @@ export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceAc
     }
   };
 
-  const handleWhatsApp = () => {
-    const message = buildShareMessage(invoiceData);
-    const phone = invoiceData.customerPhone?.replace(/\D/g, "") || "";
-    const url = phone
-      ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
-      : `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
+  const handleWhatsApp = async () => {
+    setSharing(true);
+    try {
+      let invoiceUrl = "";
+      if (invoiceStoragePath) {
+        const { data, error } = await supabase.storage
+          .from("invoices")
+          .createSignedUrl(invoiceStoragePath, 7 * 24 * 60 * 60); // 7 days
+        if (!error && data?.signedUrl) {
+          invoiceUrl = data.signedUrl;
+        }
+      }
+
+      const message = buildShareMessage(invoiceData, invoiceUrl);
+      const phone = invoiceData.customerPhone?.replace(/\D/g, "") || "";
+      const url = phone
+        ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+        : `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(url, "_blank");
+    } catch {
+      toast.error("Failed to generate invoice link");
+    } finally {
+      setSharing(false);
+    }
   };
 
   const handleEmail = () => {
@@ -59,8 +82,9 @@ export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceAc
           <Button onClick={handlePrint} variant="outline" className="h-12 justify-start gap-3">
             <Printer className="h-5 w-5" /> Print / Save as PDF
           </Button>
-          <Button onClick={handleWhatsApp} variant="outline" className="h-12 justify-start gap-3 text-green-600 hover:text-green-700 hover:bg-green-50">
-            <MessageCircle className="h-5 w-5" /> Share via WhatsApp
+          <Button onClick={handleWhatsApp} disabled={sharing} variant="outline" className="h-12 justify-start gap-3 text-green-600 hover:text-green-700 hover:bg-green-50">
+            {sharing ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
+            Share via WhatsApp
           </Button>
           <Button onClick={handleEmail} variant="outline" className="h-12 justify-start gap-3">
             <Mail className="h-5 w-5" /> Send via Email
@@ -75,12 +99,12 @@ export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceAc
   );
 }
 
-function buildShareMessage(data: InvoiceData): string {
+function buildShareMessage(data: InvoiceData, invoiceUrl?: string): string {
   const itemLines = data.items
     .map((it) => `  ${it.name} × ${it.quantity} = ₹${it.total.toFixed(0)}`)
     .join("\n");
 
-  return `🧾 *Invoice: ${data.orderNumber}*
+  let msg = `🧾 *Invoice: ${data.orderNumber}*
 ${data.orgName}
 ${data.date}
 
@@ -98,4 +122,10 @@ Payment: ${data.paymentMethod.toUpperCase()}
 Status: ✅ Paid
 
 Thank you for your business!`;
+
+  if (invoiceUrl) {
+    msg += `\n\n📄 View Invoice: ${invoiceUrl}`;
+  }
+
+  return msg;
 }
