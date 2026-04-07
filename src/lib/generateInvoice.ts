@@ -1,3 +1,5 @@
+import jsPDF from "jspdf";
+
 export interface InvoiceData {
   orderNumber: string;
   date: string;
@@ -23,6 +25,180 @@ export interface InvoiceData {
   paymentMethod: string;
 }
 
+export function generateInvoicePDF(data: InvoiceData): Blob {
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  const contentW = pageW - margin * 2;
+  let y = margin;
+
+  const GREEN = [27, 122, 61] as const;
+  const GRAY = [100, 100, 100] as const;
+  const BLACK = [26, 26, 46] as const;
+
+  // --- Header ---
+  doc.setFontSize(20);
+  doc.setTextColor(...GREEN);
+  doc.setFont("helvetica", "bold");
+  doc.text(data.orgName, margin, y + 7);
+
+  doc.setFontSize(22);
+  doc.text("TAX INVOICE", pageW - margin, y + 7, { align: "right" });
+  y += 12;
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...GRAY);
+  if (data.orgAddress) { y += 5; doc.text(data.orgAddress, margin, y); }
+  if (data.orgPhone) { y += 4; doc.text(`Tel: ${data.orgPhone}`, margin, y); }
+  if (data.orgGst) { y += 4; doc.setFont("helvetica", "bold"); doc.text(`GSTIN: ${data.orgGst}`, margin, y); doc.setFont("helvetica", "normal"); }
+  y += 4;
+
+  // Green line
+  doc.setDrawColor(...GREEN);
+  doc.setLineWidth(0.8);
+  doc.line(margin, y, pageW - margin, y);
+  y += 8;
+
+  // --- Bill To / Invoice Details ---
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+  doc.setFont("helvetica", "bold");
+  doc.text("BILL TO", margin, y);
+  doc.text("INVOICE DETAILS", pageW - margin, y, { align: "right" });
+  y += 5;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...BLACK);
+  if (data.customerName) {
+    doc.setFont("helvetica", "bold");
+    doc.text(data.customerName, margin, y);
+    doc.setFont("helvetica", "normal");
+  } else {
+    doc.setTextColor(...GRAY);
+    doc.text("Walk-in Customer", margin, y);
+    doc.setTextColor(...BLACK);
+  }
+  doc.setFont("helvetica", "bold");
+  doc.text(data.orderNumber, pageW - margin, y, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  y += 5;
+
+  if (data.customerPhone) { doc.setFontSize(9); doc.text(data.customerPhone, margin, y); }
+  doc.setFontSize(9);
+  doc.text(data.date, pageW - margin, y, { align: "right" });
+  y += 5;
+
+  if (data.customerEmail) { doc.text(data.customerEmail, margin, y); y += 5; }
+
+  // Payment badge
+  const badge = data.paymentMethod.toUpperCase();
+  doc.setFontSize(8);
+  const badgeW = doc.getTextWidth(badge) + 8;
+  doc.setFillColor(...GREEN);
+  doc.roundedRect(pageW - margin - badgeW, y - 3, badgeW, 5, 2, 2, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.text(badge, pageW - margin - badgeW + 4, y + 0.5);
+  doc.setTextColor(...BLACK);
+  y += 10;
+
+  // --- Items Table ---
+  const cols = [
+    { label: "#", w: 8, align: "center" as const },
+    { label: "Item", w: contentW - 8 - 15 - 25 - 15 - 28, align: "left" as const },
+    { label: "Qty", w: 15, align: "center" as const },
+    { label: "Rate", w: 25, align: "right" as const },
+    { label: "GST", w: 15, align: "center" as const },
+    { label: "Amount", w: 28, align: "right" as const },
+  ];
+
+  // Header row
+  doc.setFillColor(...GREEN);
+  doc.rect(margin, y, contentW, 7, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  let cx = margin;
+  for (const col of cols) {
+    const tx = col.align === "right" ? cx + col.w - 2 : col.align === "center" ? cx + col.w / 2 : cx + 2;
+    doc.text(col.label, tx, y + 5, { align: col.align });
+    cx += col.w;
+  }
+  y += 7;
+
+  // Data rows
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...BLACK);
+  doc.setFontSize(9);
+
+  for (let i = 0; i < data.items.length; i++) {
+    const item = data.items[i];
+    if (y > 270) { doc.addPage(); y = margin; }
+    cx = margin;
+    const rowData = [
+      String(i + 1),
+      item.name,
+      String(item.quantity),
+      `Rs.${item.unitPrice.toFixed(2)}`,
+      `${item.gstRate}%`,
+      `Rs.${item.total.toFixed(2)}`,
+    ];
+    for (let j = 0; j < cols.length; j++) {
+      const col = cols[j];
+      const tx = col.align === "right" ? cx + col.w - 2 : col.align === "center" ? cx + col.w / 2 : cx + 2;
+      doc.text(rowData[j], tx, y + 4, { align: col.align });
+      cx += col.w;
+    }
+    doc.setDrawColor(230, 230, 230);
+    doc.setLineWidth(0.2);
+    doc.line(margin, y + 6, pageW - margin, y + 6);
+    y += 7;
+  }
+  y += 4;
+
+  // --- Totals ---
+  const totalsX = pageW - margin - 60;
+  doc.setFontSize(10);
+  doc.setTextColor(...GRAY);
+
+  const totalsRows = [
+    { label: "Subtotal", value: `Rs.${data.subtotal.toFixed(2)}` },
+    { label: "CGST", value: `Rs.${data.cgst.toFixed(2)}` },
+    { label: "SGST", value: `Rs.${data.sgst.toFixed(2)}` },
+  ];
+
+  for (const row of totalsRows) {
+    doc.text(row.label, totalsX, y);
+    doc.text(row.value, pageW - margin, y, { align: "right" });
+    y += 6;
+  }
+
+  // Grand total
+  doc.setDrawColor(...GREEN);
+  doc.setLineWidth(0.6);
+  doc.line(totalsX, y - 1, pageW - margin, y - 1);
+  y += 4;
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...GREEN);
+  doc.text("Total", totalsX, y);
+  doc.text(`Rs.${data.total.toFixed(2)}`, pageW - margin, y, { align: "right" });
+  y += 15;
+
+  // --- Footer ---
+  doc.setDrawColor(230, 230, 230);
+  doc.setLineWidth(0.3);
+  doc.line(margin, y, pageW - margin, y);
+  y += 6;
+  doc.setFontSize(9);
+  doc.setTextColor(...GRAY);
+  doc.setFont("helvetica", "normal");
+  doc.text("Thank you for your business!  •  This is a computer-generated invoice.", pageW / 2, y, { align: "center" });
+
+  return doc.output("blob");
+}
+
 export function generateInvoiceHTML(data: InvoiceData): string {
   const itemsRows = data.items
     .map(
@@ -31,9 +207,9 @@ export function generateInvoiceHTML(data: InvoiceData): string {
       <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${i + 1}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #eee;">${item.name}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;">₹${item.unitPrice.toFixed(2)}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;">Rs.${item.unitPrice.toFixed(2)}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${item.gstRate}%</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;">₹${item.total.toFixed(2)}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;">Rs.${item.total.toFixed(2)}</td>
     </tr>`
     )
     .join("");
@@ -104,10 +280,10 @@ export function generateInvoiceHTML(data: InvoiceData): string {
 
   <div class="totals">
     <table class="totals-table">
-      <tr><td class="label">Subtotal</td><td class="value">₹${data.subtotal.toFixed(2)}</td></tr>
-      <tr><td class="label">CGST</td><td class="value">₹${data.cgst.toFixed(2)}</td></tr>
-      <tr><td class="label">SGST</td><td class="value">₹${data.sgst.toFixed(2)}</td></tr>
-      <tr class="grand-total"><td class="label">Total</td><td class="value">₹${data.total.toFixed(2)}</td></tr>
+      <tr><td class="label">Subtotal</td><td class="value">Rs.${data.subtotal.toFixed(2)}</td></tr>
+      <tr><td class="label">CGST</td><td class="value">Rs.${data.cgst.toFixed(2)}</td></tr>
+      <tr><td class="label">SGST</td><td class="value">Rs.${data.sgst.toFixed(2)}</td></tr>
+      <tr class="grand-total"><td class="label">Total</td><td class="value">Rs.${data.total.toFixed(2)}</td></tr>
     </table>
   </div>
 
