@@ -146,6 +146,7 @@ export default function POS() {
       setSelectedCustomer(null);
       setCheckoutOpen(false);
       setInvoiceData(invoice);
+      setInvoiceStoragePath(storedPath);
       setInvoiceOpen(true);
       toast.success(`Order ${orderNumber} completed — ₹${totals.total.toFixed(0)}`);
     } catch (err: any) {
