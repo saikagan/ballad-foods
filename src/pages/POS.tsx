@@ -69,7 +69,7 @@ export default function POS() {
           cgst: totals.cgst,
           sgst: totals.sgst,
           total: totals.total,
-          status: "completed" as const,
+          status: "paid" as const,
           payment_method: paymentMethod,
           payment_status: "paid" as const,
           created_by: user.id,

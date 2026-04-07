@@ -404,7 +404,7 @@ export type Database = {
         | "bakery"
         | "salon"
         | "other"
-      order_status: "pending" | "completed" | "cancelled"
+      order_status: "pending" | "completed" | "cancelled" | "paid"
       payment_method: "cash" | "upi" | "card"
       payment_status: "pending" | "paid" | "refunded"
     }
@@ -547,7 +547,7 @@ export const Constants = {
         "salon",
         "other",
       ],
-      order_status: ["pending", "completed", "cancelled"],
+      order_status: ["pending", "completed", "cancelled", "paid"],
       payment_method: ["cash", "upi", "card"],
       payment_status: ["pending", "paid", "refunded"],
     },

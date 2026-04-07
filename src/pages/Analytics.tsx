@@ -18,7 +18,7 @@ export default function Analytics() {
         .from("orders")
         .select("total, created_at")
         .eq("org_id", orgId)
-        .eq("status", "completed")
+        .in("status", ["completed", "paid"])
         .gte("created_at", since.toISOString());
       if (error) throw error;
 
