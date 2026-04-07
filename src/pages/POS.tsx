@@ -220,8 +220,9 @@ export default function POS() {
 
       <InvoiceActions
         open={invoiceOpen}
-        onClose={() => { setInvoiceOpen(false); setInvoiceData(null); }}
+        onClose={() => { setInvoiceOpen(false); setInvoiceData(null); setInvoiceStoragePath(null); }}
         invoiceData={invoiceData}
+        invoiceStoragePath={invoiceStoragePath}
       />
     </AppLayout>
   );
