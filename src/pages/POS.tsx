@@ -13,7 +13,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 import type { InvoiceData } from "@/lib/generateInvoice";
-import { generateInvoiceHTML } from "@/lib/generateInvoice";
+import { generateInvoicePDF } from "@/lib/generateInvoice";
 
 type PaymentMethod = Database["public"]["Enums"]["payment_method"];
 
@@ -128,12 +128,11 @@ export default function POS() {
 
       let storedPath: string | null = null;
       try {
-        const invoiceHtml = generateInvoiceHTML(invoice);
-        const blob = new Blob([invoiceHtml], { type: "text/html" });
-        const filePath = `${orgId}/${order.id}.html`;
+        const pdfBlob = generateInvoicePDF(invoice);
+        const filePath = `${orgId}/${order.id}.pdf`;
         const { error: uploadErr } = await supabase.storage
           .from("invoices")
-          .upload(filePath, blob, { contentType: "text/html", upsert: true });
+          .upload(filePath, pdfBlob, { contentType: "application/pdf", upsert: true });
         if (!uploadErr) {
           storedPath = filePath;
           await supabase.from("orders").update({ invoice_url: filePath }).eq("id", order.id);
