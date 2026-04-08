@@ -13,18 +13,21 @@ import {
 import logo from "@/assets/BalladFoodLogo.jpeg";
 
 const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-  { label: "POS", icon: ShoppingCart, path: "/pos" },
-  { label: "Menu Items", icon: PackageSearch, path: "/menu" },
-  { label: "Orders", icon: Receipt, path: "/orders" },
-  { label: "Customers", icon: Users, path: "/customers" },
-  { label: "Analytics", icon: BarChart3, path: "/analytics" },
-  { label: "Settings", icon: Settings, path: "/settings" },
+  { label: "Dashboard", icon: LayoutDashboard, path: "/", adminOnly: false },
+  { label: "POS", icon: ShoppingCart, path: "/pos", adminOnly: false },
+  { label: "Menu Items", icon: PackageSearch, path: "/menu", adminOnly: true },
+  { label: "Orders", icon: Receipt, path: "/orders", adminOnly: false },
+  { label: "Customers", icon: Users, path: "/customers", adminOnly: false },
+  { label: "Analytics", icon: BarChart3, path: "/analytics", adminOnly: true },
+  { label: "Settings", icon: Settings, path: "/settings", adminOnly: true },
 ];
 
 export default function AppSidebar() {
   const { pathname } = useLocation();
-  const { signOut, profile } = useAuth();
+  const { signOut, profile, hasRole } = useAuth();
+  const isAdmin = hasRole("admin");
+
+  const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex-shrink-0">
@@ -39,7 +42,7 @@ export default function AppSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map((item) => {
+        {visibleItems.map((item) => {
           const isActive = pathname === item.path;
           return (
             <Link
