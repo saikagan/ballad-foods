@@ -37,6 +37,7 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [canCreateOrg, setCanCreateOrg] = useState(false);
+  const [duplicateOrgId, setDuplicateOrgId] = useState<string | null>(null);
 
   useEffect(() => {
     // Only allow org creation if no organizations exist yet (first admin setup)
@@ -58,10 +59,11 @@ export default function Onboarding() {
     );
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent, joinExisting = false) => {
     e.preventDefault();
     if (!user || selectedIndustries.length === 0) return;
     setLoading(true);
+    setDuplicateOrgId(null);
 
     try {
       const orgId = crypto.randomUUID();
@@ -74,17 +76,30 @@ export default function Onboarding() {
         _gst_number: gstNumber || null,
         _phone: phone || null,
         _industries: selectedIndustries,
-      });
+        _join_existing: joinExisting,
+      } as any);
       if (error) throw error;
 
-      toast.success("Business created!");
+      toast.success(joinExisting ? "Joined organization as Admin!" : "Business created!");
       await refreshUser();
       navigate("/");
     } catch (err: any) {
-      toast.error(err.message || "Failed to create organization");
+      const msg = err.message || "";
+      if (msg.startsWith("ORG_EXISTS:")) {
+        const existingId = msg.split("ORG_EXISTS:")[1]?.trim();
+        setDuplicateOrgId(existingId || "unknown");
+      } else {
+        toast.error(msg || "Failed to create organization");
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleJoinExisting = async () => {
+    // Re-submit with join flag
+    const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+    await handleCreate(fakeEvent, true);
   };
 
   if (checking) {
@@ -188,6 +203,24 @@ export default function Onboarding() {
                 />
               </div>
             </div>
+            {duplicateOrgId && (
+              <div className="rounded-lg border-2 border-destructive/50 bg-accent p-4 space-y-3">
+                <p className="text-sm font-medium text-accent-foreground">
+                  An organization named "<span className="font-bold">{orgName}</span>" already exists.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Would you like to join it as an Admin? You'll have full access and can manage users from Settings.
+                </p>
+                <div className="flex gap-2">
+                  <Button type="button" onClick={handleJoinExisting} disabled={loading} className="flex-1">
+                    {loading ? "Joining..." : "Join as Admin"}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setDuplicateOrgId(null)} className="flex-1">
+                    Change Name
+                  </Button>
+                </div>
+              </div>
+            )}
             <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading || selectedIndustries.length === 0}>
               {loading ? "Creating..." : "Create Business"}
             </Button>
