@@ -100,6 +100,7 @@ export default function InvoiceActions({ open, onClose, invoiceData, invoiceStor
 }
 
 function buildShareMessage(data: InvoiceData, invoiceUrl?: string): string {
+  const showGst = data.applyGst !== false;
   const itemLines = data.items
     .map((it) => `  ${it.name} × ${it.quantity} = ₹${it.total.toFixed(0)}`)
     .join("\n");
@@ -113,10 +114,14 @@ ${data.customerName ? `Customer: ${data.customerName}` : "Walk-in Customer"}
 *Items:*
 ${itemLines}
 
-Subtotal: ₹${data.subtotal.toFixed(2)}
-CGST: ₹${data.cgst.toFixed(2)}
-SGST: ₹${data.sgst.toFixed(2)}
-*Total: ₹${data.total.toFixed(2)}*
+Subtotal: ₹${data.subtotal.toFixed(2)}`;
+
+  if (showGst) {
+    msg += `\nCGST: ₹${data.cgst.toFixed(2)}`;
+    msg += `\nSGST: ₹${data.sgst.toFixed(2)}`;
+  }
+
+  msg += `\n*Total: ₹${data.total.toFixed(2)}*
 
 Payment: ${data.paymentMethod.toUpperCase()}
 Status: ✅ Paid
