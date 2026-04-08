@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +46,30 @@ export default function Auth() {
     );
   };
 
+  const [forgotMode, setForgotMode] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error("Please enter your email");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Password reset link sent! Check your email.");
+      setForgotMode(false);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send reset link");
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isLogin && selectedIndustries.length === 0) {
@@ -75,68 +100,96 @@ export default function Auth() {
             <Zap className="h-7 w-7 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl font-bold">
-            {isLogin ? "Welcome back" : "Create your account"}
+            {forgotMode ? "Reset Password" : isLogin ? "Welcome back" : "Create your account"}
           </CardTitle>
           <CardDescription>
-            {isLogin ? "Sign in to your Smart POS dashboard" : "Set up your Smart POS in one step"}
+            {forgotMode
+              ? "Enter your email and we'll send a reset link"
+              : isLogin ? "Sign in to your Smart POS dashboard" : "Set up your Smart POS in one step"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <>
+          {forgotMode ? (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Email</Label>
+                <Input id="reset-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+              </div>
+              <Button type="submit" className="w-full" disabled={resetLoading}>
+                {resetLoading ? "Sending..." : "Send Reset Link"}
+              </Button>
+              <div className="text-center text-sm text-muted-foreground">
+                <button onClick={() => setForgotMode(false)} className="text-primary font-medium hover:underline">
+                  Back to Sign In
+                </button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {!isLogin && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="orgName">Business Name</Label>
+                      <Input id="orgName" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="My Business" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Industries <span className="text-xs text-muted-foreground">(select one or more)</span></Label>
+                      <div className="grid grid-cols-5 gap-2">
+                        {industries.map((ind) => {
+                          const Icon = ind.icon;
+                          const isSelected = selectedIndustries.includes(ind.value);
+                          return (
+                            <button
+                              key={ind.value}
+                              type="button"
+                              onClick={() => toggleIndustry(ind.value)}
+                              className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center ${
+                                isSelected
+                                  ? "border-primary bg-primary/10 text-primary"
+                                  : "border-border hover:border-primary/30"
+                              }`}
+                            >
+                              <Icon className="h-4 w-4" />
+                              <span className="text-[9px] font-medium leading-tight">{ind.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" required />
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="orgName">Business Name</Label>
-                  <Input id="orgName" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="My Business" required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Industries <span className="text-xs text-muted-foreground">(select one or more)</span></Label>
-                  <div className="grid grid-cols-5 gap-2">
-                    {industries.map((ind) => {
-                      const Icon = ind.icon;
-                      const isSelected = selectedIndustries.includes(ind.value);
-                      return (
-                        <button
-                          key={ind.value}
-                          type="button"
-                          onClick={() => toggleIndustry(ind.value)}
-                          className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center ${
-                            isSelected
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border hover:border-primary/30"
-                          }`}
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span className="text-[9px] font-medium leading-tight">{ind.label}</span>
-                        </button>
-                      );
-                    })}
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    {isLogin && (
+                      <button type="button" onClick={() => setForgotMode(true)} className="text-xs text-primary hover:underline">
+                        Forgot password?
+                      </button>
+                    )}
                   </div>
+                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
                 </div>
-              </>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-            <button onClick={() => setIsLogin(!isLogin)} className="text-primary font-medium hover:underline">
-              {isLogin ? "Sign up" : "Sign in"}
-            </button>
-          </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
+                </Button>
+              </form>
+              <div className="mt-4 text-center text-sm text-muted-foreground">
+                {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+                <button onClick={() => setIsLogin(!isLogin)} className="text-primary font-medium hover:underline">
+                  {isLogin ? "Sign up" : "Sign in"}
+                </button>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
