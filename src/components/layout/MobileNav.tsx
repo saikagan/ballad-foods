@@ -1,21 +1,26 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, ShoppingCart, PackageSearch, Receipt, BarChart3 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { LayoutDashboard, ShoppingCart, PackageSearch, Receipt, Users } from "lucide-react";
 
 const mobileNav = [
-  { icon: LayoutDashboard, path: "/", label: "Home" },
-  { icon: ShoppingCart, path: "/pos", label: "POS" },
-  { icon: PackageSearch, path: "/menu", label: "Menu Items" },
-  { icon: Receipt, path: "/orders", label: "Orders" },
-  { icon: BarChart3, path: "/analytics", label: "More" },
+  { icon: LayoutDashboard, path: "/", label: "Home", adminOnly: false },
+  { icon: ShoppingCart, path: "/pos", label: "POS", adminOnly: false },
+  { icon: PackageSearch, path: "/menu", label: "Menu Items", adminOnly: true },
+  { icon: Receipt, path: "/orders", label: "Orders", adminOnly: false },
+  { icon: Users, path: "/customers", label: "Customers", adminOnly: false },
 ];
 
 export default function MobileNav() {
   const { pathname } = useLocation();
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole("admin");
+
+  const visibleItems = mobileNav.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card border-t z-50">
       <div className="flex justify-around py-2">
-        {mobileNav.map((item) => {
+        {visibleItems.map((item) => {
           const isActive = pathname === item.path;
           return (
             <Link

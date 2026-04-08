@@ -19,7 +19,8 @@ import ResetPassword from "./pages/ResetPassword";
 const queryClient = new QueryClient();
 
 function AppRoutes() {
-  const { user, loading, orgId } = useAuth();
+  const { user, loading, orgId, hasRole } = useAuth();
+  const isAdmin = hasRole("admin");
 
   if (loading) {
     return (
@@ -55,11 +56,12 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Dashboard />} />
       <Route path="/pos" element={<POS />} />
-      <Route path="/menu" element={<Menu />} />
       <Route path="/orders" element={<Orders />} />
       <Route path="/customers" element={<Customers />} />
-      <Route path="/analytics" element={<Analytics />} />
-      <Route path="/settings" element={<SettingsPage />} />
+      {/* Admin-only routes */}
+      <Route path="/menu" element={isAdmin ? <Menu /> : <Navigate to="/" replace />} />
+      <Route path="/analytics" element={isAdmin ? <Analytics /> : <Navigate to="/" replace />} />
+      <Route path="/settings" element={isAdmin ? <SettingsPage /> : <Navigate to="/" replace />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/auth" element={<Navigate to="/" replace />} />
       <Route path="*" element={<NotFound />} />
