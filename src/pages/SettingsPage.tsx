@@ -260,7 +260,44 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Your Profile */}
+        {/* GST Settings */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-primary" />
+              <div>
+                <CardTitle className="text-base">GST Settings</CardTitle>
+                <CardDescription>Enable or disable GST on bills</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Apply GST</p>
+                <p className="text-xs text-muted-foreground">When disabled, no GST (CGST/SGST) will be added to bills</p>
+              </div>
+              <Switch
+                checked={(org as any)?.apply_gst !== false}
+                disabled={!isAdmin}
+                onCheckedChange={async (checked) => {
+                  if (!orgId) return;
+                  const { error } = await supabase
+                    .from("organizations")
+                    .update({ apply_gst: checked } as any)
+                    .eq("id", orgId);
+                  if (error) {
+                    toast.error(error.message);
+                  } else {
+                    queryClient.invalidateQueries({ queryKey: ["org", orgId] });
+                    toast.success(checked ? "GST enabled" : "GST disabled");
+                  }
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
