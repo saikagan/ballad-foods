@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import {
   Building2, UtensilsCrossed, ShoppingBag, Pill, Monitor,
-  ShoppingCart, Shirt, Wrench, CakeSlice, Scissors, MoreHorizontal,
+  ShoppingCart, Shirt, Wrench, CakeSlice, Scissors, MoreHorizontal, ShieldAlert, LogOut,
 } from "lucide-react";
 
 const industries = [
@@ -28,13 +28,27 @@ const industries = [
 type IndustryValue = (typeof industries)[number]["value"];
 
 export default function Onboarding() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, signOut } = useAuth();
   const navigate = useNavigate();
   const [orgName, setOrgName] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<IndustryValue[]>(["restaurant"]);
   const [gstNumber, setGstNumber] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [canCreateOrg, setCanCreateOrg] = useState(false);
+
+  useEffect(() => {
+    // Only allow org creation if no organizations exist yet (first admin setup)
+    const checkOrgs = async () => {
+      const { count } = await supabase
+        .from("organizations")
+        .select("id", { count: "exact", head: true });
+      setCanCreateOrg(count === 0);
+      setChecking(false);
+    };
+    checkOrgs();
+  }, []);
 
   const toggleIndustry = (value: IndustryValue) => {
     setSelectedIndustries((prev) =>
@@ -72,6 +86,39 @@ export default function Onboarding() {
       setLoading(false);
     }
   };
+
+  if (checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  // Non-admin users who weren't added by an admin — show waiting message
+  if (!canCreateOrg) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md animate-scale-in text-center">
+          <CardHeader className="space-y-3">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-muted">
+              <ShieldAlert className="h-7 w-7 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-xl font-bold">Access Pending</CardTitle>
+            <CardDescription className="text-base">
+              You need to be added to an organization by an admin. Please contact your administrator to get access.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" className="w-full" onClick={signOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
