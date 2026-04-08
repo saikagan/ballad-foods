@@ -203,6 +203,24 @@ export default function Onboarding() {
                 />
               </div>
             </div>
+            {duplicateOrgId && (
+              <div className="rounded-lg border-2 border-amber-500/50 bg-amber-500/10 p-4 space-y-3">
+                <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                  An organization named "<span className="font-bold">{orgName}</span>" already exists.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Would you like to join it as an Admin? You'll have full access and can manage users from Settings.
+                </p>
+                <div className="flex gap-2">
+                  <Button type="button" onClick={handleJoinExisting} disabled={loading} className="flex-1">
+                    {loading ? "Joining..." : "Join as Admin"}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setDuplicateOrgId(null)} className="flex-1">
+                    Change Name
+                  </Button>
+                </div>
+              </div>
+            )}
             <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading || selectedIndustries.length === 0}>
               {loading ? "Creating..." : "Create Business"}
             </Button>
