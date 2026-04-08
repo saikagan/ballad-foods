@@ -1,0 +1,1 @@
+ALTER TABLE public.organizations ALTER COLUMN apply_gst SET DEFAULT false;
