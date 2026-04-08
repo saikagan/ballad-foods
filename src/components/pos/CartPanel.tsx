@@ -5,6 +5,7 @@ import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 interface CartPanelProps {
   items: CartItem[];
   totals: { subtotal: number; cgst: number; sgst: number; total: number };
+  applyGst?: boolean;
   onUpdateQuantity: (id: string, qty: number) => void;
   onRemoveItem: (id: string) => void;
   onCheckout: () => void;
@@ -16,6 +17,7 @@ interface CartPanelProps {
 export default function CartPanel({
   items,
   totals,
+  applyGst = true,
   onUpdateQuantity,
   onRemoveItem,
   onCheckout,
@@ -91,14 +93,18 @@ export default function CartPanel({
             <span>Subtotal</span>
             <span className="font-mono">₹{totals.subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>CGST</span>
-            <span className="font-mono">₹{totals.cgst.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>SGST</span>
-            <span className="font-mono">₹{totals.sgst.toFixed(2)}</span>
-          </div>
+          {applyGst && (
+            <>
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>CGST</span>
+                <span className="font-mono">₹{totals.cgst.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>SGST</span>
+                <span className="font-mono">₹{totals.sgst.toFixed(2)}</span>
+              </div>
+            </>
+          )}
           <div className="flex justify-between text-lg font-bold pt-2 border-t">
             <span>Total</span>
             <span className="font-mono text-primary">₹{totals.total.toFixed(2)}</span>

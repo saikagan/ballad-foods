@@ -19,13 +19,6 @@ type PaymentMethod = Database["public"]["Enums"]["payment_method"];
 
 export default function POS() {
   const { orgId, user } = useAuth();
-  const { items, addItem, updateQuantity, removeItem, clearCart, totals } = useCart();
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<SelectedCustomer | null>(null);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [invoiceOpen, setInvoiceOpen] = useState(false);
-  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
-  const [invoiceStoragePath, setInvoiceStoragePath] = useState<string | null>(null);
 
   const { data: org } = useQuery({
     queryKey: ["org", orgId],
@@ -36,6 +29,15 @@ export default function POS() {
     },
     enabled: !!orgId,
   });
+
+  const applyGst = (org as any)?.apply_gst !== false;
+  const { items, addItem, updateQuantity, removeItem, clearCart, totals } = useCart(applyGst);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<SelectedCustomer | null>(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [invoiceOpen, setInvoiceOpen] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [invoiceStoragePath, setInvoiceStoragePath] = useState<string | null>(null);
 
   const handleCheckout = async (paymentMethod: PaymentMethod) => {
     if (!orgId || !user || items.length === 0) return;
@@ -169,6 +171,7 @@ export default function POS() {
           <CartPanel
             items={items}
             totals={totals}
+            applyGst={applyGst}
             onUpdateQuantity={updateQuantity}
             onRemoveItem={removeItem}
             onCheckout={() => {

@@ -251,6 +251,7 @@ export type Database = {
       organizations: {
         Row: {
           address: string | null
+          apply_gst: boolean
           created_at: string
           email: string | null
           gst_number: string | null
@@ -264,6 +265,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          apply_gst?: boolean
           created_at?: string
           email?: string | null
           gst_number?: string | null
@@ -277,6 +279,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          apply_gst?: boolean
           created_at?: string
           email?: string | null
           gst_number?: string | null

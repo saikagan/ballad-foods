@@ -1,0 +1,1 @@
+ALTER TABLE public.organizations ADD COLUMN apply_gst boolean NOT NULL DEFAULT true;

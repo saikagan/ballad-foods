@@ -9,7 +9,7 @@ export interface CartItem {
   quantity: number;
 }
 
-export function useCart() {
+export function useCart(applyGst: boolean = true) {
   const [items, setItems] = useState<CartItem[]>([]);
 
   const addItem = useCallback((menuItem: { id: string; name: string; price: number; gst_rate: number }) => {
@@ -56,9 +56,11 @@ export function useCart() {
     items.forEach((item) => {
       const lineTotal = item.unitPrice * item.quantity;
       subtotal += lineTotal;
-      const gstAmount = (lineTotal * item.gstRate) / 100;
-      totalCgst += gstAmount / 2;
-      totalSgst += gstAmount / 2;
+      if (applyGst) {
+        const gstAmount = (lineTotal * item.gstRate) / 100;
+        totalCgst += gstAmount / 2;
+        totalSgst += gstAmount / 2;
+      }
     });
 
     return {
@@ -67,7 +69,6 @@ export function useCart() {
       sgst: Math.round(totalSgst * 100) / 100,
       total: Math.round((subtotal + totalCgst + totalSgst) * 100) / 100,
     };
-  }, [items]);
-
+  }, [items, applyGst]);
   return { items, addItem, updateQuantity, removeItem, clearCart, totals };
 }
