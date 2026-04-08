@@ -20,7 +20,7 @@ export default function Menu() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState({ name: "", price: "", category: "Main Course", gst_rate: "5", is_available: true });
+  const [form, setForm] = useState({ name: "", price: "", category: "Main Course", gst_rate: "0", is_available: true });
   const canEdit = hasRole("admin") || hasRole("manager");
 
   const { data: items = [] } = useQuery({
@@ -57,7 +57,7 @@ export default function Menu() {
       queryClient.invalidateQueries({ queryKey: ["menu_items"] });
       setDialogOpen(false);
       setEditing(null);
-      setForm({ name: "", price: "", category: "Main Course", gst_rate: "5", is_available: true });
+      setForm({ name: "", price: "", category: "Main Course", gst_rate: "0", is_available: true });
       toast.success(editing ? "Item updated" : "Item added");
     },
     onError: (err: any) => toast.error(err.message),
