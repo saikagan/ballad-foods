@@ -48,7 +48,7 @@ export default function Orders() {
       // Send WhatsApp message
       const phone = order.customers?.phone?.replace(/\D/g, "");
       if (phone) {
-        const surveyLink = `${window.location.origin}/survey/${order.id}`;
+        const surveyLink = "https://docs.google.com/forms/d/1G3e0cOyKYu4ttPYRKZbTB6Oq86FloVxcBfgt4z39w3s/edit";
         const message = encodeURIComponent(
           `Thank you for your order! Please rate us: ${surveyLink}`
         );
