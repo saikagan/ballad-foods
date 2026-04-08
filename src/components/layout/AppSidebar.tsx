@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import logo from "@/assets/BalladFoodLogo.jpeg";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
@@ -29,11 +30,9 @@ export default function AppSidebar() {
     <aside className="hidden md:flex flex-col w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex-shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
-        <div className="h-9 w-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
-          <PackageSearch className="h-5 w-5 text-sidebar-primary-foreground" />
-        </div>
+        <img src={logo} alt="Ballad Foods" className="h-9 w-9 rounded-lg object-cover" />
         <div>
-          <h1 className="font-bold text-sm">Smart POS</h1>
+          <h1 className="font-bold text-sm">Ballad Foods</h1>
           <p className="text-xs text-sidebar-foreground/60">Business Suite</p>
         </div>
       </div>
