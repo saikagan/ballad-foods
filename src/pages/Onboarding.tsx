@@ -37,6 +37,7 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [canCreateOrg, setCanCreateOrg] = useState(false);
+  const [duplicateOrgId, setDuplicateOrgId] = useState<string | null>(null);
 
   useEffect(() => {
     // Only allow org creation if no organizations exist yet (first admin setup)
