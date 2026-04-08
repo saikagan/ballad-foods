@@ -118,6 +118,7 @@ export default function CreateUserDialog({ onCreated }: CreateUserDialogProps) {
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="manager">Manager</SelectItem>
                 <SelectItem value="cashier">Cashier</SelectItem>
+                <SelectItem value="normal_staff">Normal Staff</SelectItem>
               </SelectContent>
             </Select>
           </div>
