@@ -60,6 +60,7 @@ function AppRoutes() {
       <Route path="/customers" element={<Customers />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/auth" element={<Navigate to="/" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
