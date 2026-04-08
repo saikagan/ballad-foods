@@ -171,6 +171,7 @@ export default function POS() {
           <CartPanel
             items={items}
             totals={totals}
+            applyGst={applyGst}
             onUpdateQuantity={updateQuantity}
             onRemoveItem={removeItem}
             onCheckout={() => {

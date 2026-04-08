@@ -17,6 +17,7 @@ interface CartPanelProps {
 export default function CartPanel({
   items,
   totals,
+  applyGst = true,
   onUpdateQuantity,
   onRemoveItem,
   onCheckout,
