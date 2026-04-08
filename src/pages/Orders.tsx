@@ -117,8 +117,8 @@ export default function Orders() {
 
       <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
         <span>Subtotal: ₹{Number(order.subtotal).toFixed(2)}</span>
-        <span>CGST: ₹{Number(order.cgst).toFixed(2)}</span>
-        <span>SGST: ₹{Number(order.sgst).toFixed(2)}</span>
+        {Number(order.cgst) > 0 && <span>CGST: ₹{Number(order.cgst).toFixed(2)}</span>}
+        {Number(order.sgst) > 0 && <span>SGST: ₹{Number(order.sgst).toFixed(2)}</span>}
 
         <div className="ml-auto flex items-center gap-2">
           {order.invoice_url && (
@@ -132,13 +132,7 @@ export default function Orders() {
                     .from("invoices")
                     .createSignedUrl(order.invoice_url!, 60);
                   if (error || !data?.signedUrl) throw error || new Error("No URL");
-                  const res = await fetch(data.signedUrl);
-                  const html = await res.text();
-                  const w = window.open("", "_blank", "width=800,height=900");
-                  if (w) {
-                    w.document.write(html);
-                    w.document.close();
-                  }
+                  window.open(data.signedUrl, "_blank");
                 } catch {
                   toast.error("Failed to load invoice");
                 }

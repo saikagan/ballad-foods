@@ -11,6 +11,7 @@ export interface InvoiceData {
   customerName?: string | null;
   customerPhone?: string | null;
   customerEmail?: string | null;
+  applyGst?: boolean;
   items: {
     name: string;
     quantity: number;
@@ -31,6 +32,7 @@ export function generateInvoicePDF(data: InvoiceData): Blob {
   const margin = 15;
   const contentW = pageW - margin * 2;
   let y = margin;
+  const showGst = data.applyGst !== false;
 
   const GREEN = [27, 122, 61] as const;
   const GRAY = [100, 100, 100] as const;
@@ -43,7 +45,7 @@ export function generateInvoicePDF(data: InvoiceData): Blob {
   doc.text(data.orgName, margin, y + 7);
 
   doc.setFontSize(22);
-  doc.text("TAX INVOICE", pageW - margin, y + 7, { align: "right" });
+  doc.text(showGst ? "TAX INVOICE" : "INVOICE", pageW - margin, y + 7, { align: "right" });
   y += 12;
 
   doc.setFontSize(9);
@@ -51,7 +53,7 @@ export function generateInvoicePDF(data: InvoiceData): Blob {
   doc.setTextColor(...GRAY);
   if (data.orgAddress) { y += 5; doc.text(data.orgAddress, margin, y); }
   if (data.orgPhone) { y += 4; doc.text(`Tel: ${data.orgPhone}`, margin, y); }
-  if (data.orgGst) { y += 4; doc.setFont("helvetica", "bold"); doc.text(`GSTIN: ${data.orgGst}`, margin, y); doc.setFont("helvetica", "normal"); }
+  if (showGst && data.orgGst) { y += 4; doc.setFont("helvetica", "bold"); doc.text(`GSTIN: ${data.orgGst}`, margin, y); doc.setFont("helvetica", "normal"); }
   y += 4;
 
   // Green line
@@ -104,14 +106,22 @@ export function generateInvoicePDF(data: InvoiceData): Blob {
   y += 10;
 
   // --- Items Table ---
-  const cols = [
-    { label: "#", w: 8, align: "center" as const },
-    { label: "Item", w: contentW - 8 - 15 - 25 - 15 - 28, align: "left" as const },
-    { label: "Qty", w: 15, align: "center" as const },
-    { label: "Rate", w: 25, align: "right" as const },
-    { label: "GST", w: 15, align: "center" as const },
-    { label: "Amount", w: 28, align: "right" as const },
-  ];
+  const cols = showGst
+    ? [
+        { label: "#", w: 8, align: "center" as const },
+        { label: "Item", w: contentW - 8 - 15 - 25 - 15 - 28, align: "left" as const },
+        { label: "Qty", w: 15, align: "center" as const },
+        { label: "Rate", w: 25, align: "right" as const },
+        { label: "GST", w: 15, align: "center" as const },
+        { label: "Amount", w: 28, align: "right" as const },
+      ]
+    : [
+        { label: "#", w: 8, align: "center" as const },
+        { label: "Item", w: contentW - 8 - 15 - 25 - 28, align: "left" as const },
+        { label: "Qty", w: 15, align: "center" as const },
+        { label: "Rate", w: 25, align: "right" as const },
+        { label: "Amount", w: 28, align: "right" as const },
+      ];
 
   // Header row
   doc.setFillColor(...GREEN);
@@ -136,14 +146,9 @@ export function generateInvoicePDF(data: InvoiceData): Blob {
     const item = data.items[i];
     if (y > 270) { doc.addPage(); y = margin; }
     cx = margin;
-    const rowData = [
-      String(i + 1),
-      item.name,
-      String(item.quantity),
-      `Rs.${item.unitPrice.toFixed(2)}`,
-      `${item.gstRate}%`,
-      `Rs.${item.total.toFixed(2)}`,
-    ];
+    const rowData = showGst
+      ? [String(i + 1), item.name, String(item.quantity), `Rs.${item.unitPrice.toFixed(2)}`, `${item.gstRate}%`, `Rs.${item.total.toFixed(2)}`]
+      : [String(i + 1), item.name, String(item.quantity), `Rs.${item.unitPrice.toFixed(2)}`, `Rs.${item.total.toFixed(2)}`];
     for (let j = 0; j < cols.length; j++) {
       const col = cols[j];
       const tx = col.align === "right" ? cx + col.w - 2 : col.align === "center" ? cx + col.w / 2 : cx + 2;
@@ -162,11 +167,13 @@ export function generateInvoicePDF(data: InvoiceData): Blob {
   doc.setFontSize(10);
   doc.setTextColor(...GRAY);
 
-  const totalsRows = [
+  const totalsRows: { label: string; value: string }[] = [
     { label: "Subtotal", value: `Rs.${data.subtotal.toFixed(2)}` },
-    { label: "CGST", value: `Rs.${data.cgst.toFixed(2)}` },
-    { label: "SGST", value: `Rs.${data.sgst.toFixed(2)}` },
   ];
+  if (showGst) {
+    totalsRows.push({ label: "CGST", value: `Rs.${data.cgst.toFixed(2)}` });
+    totalsRows.push({ label: "SGST", value: `Rs.${data.sgst.toFixed(2)}` });
+  }
 
   for (const row of totalsRows) {
     doc.text(row.label, totalsX, y);
@@ -200,6 +207,8 @@ export function generateInvoicePDF(data: InvoiceData): Blob {
 }
 
 export function generateInvoiceHTML(data: InvoiceData): string {
+  const showGst = data.applyGst !== false;
+
   const itemsRows = data.items
     .map(
       (item, i) => `
@@ -208,7 +217,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
       <td style="padding:8px 12px;border-bottom:1px solid #eee;">${item.name}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;">Rs.${item.unitPrice.toFixed(2)}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${item.gstRate}%</td>
+      ${showGst ? `<td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${item.gstRate}%</td>` : ""}
       <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;">Rs.${item.total.toFixed(2)}</td>
     </tr>`
     )
@@ -232,8 +241,8 @@ export function generateInvoiceHTML(data: InvoiceData): string {
   th { padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   th:nth-child(1) { text-align: center; }
   th:nth-child(3) { text-align: center; }
-  th:nth-child(4), th:nth-child(6) { text-align: right; }
-  th:nth-child(5) { text-align: center; }
+  th:nth-child(4) { text-align: right; }
+  th:last-child { text-align: right; }
   .totals { display: flex; justify-content: flex-end; }
   .totals-table { width: 280px; }
   .totals-table td { padding: 6px 12px; font-size: 14px; }
@@ -249,10 +258,10 @@ export function generateInvoiceHTML(data: InvoiceData): string {
       <div class="org-name">${data.orgName}</div>
       ${data.orgAddress ? `<div style="font-size:13px;color:#555;margin-top:4px;">${data.orgAddress}</div>` : ""}
       ${data.orgPhone ? `<div style="font-size:13px;color:#555;">Tel: ${data.orgPhone}</div>` : ""}
-      ${data.orgGst ? `<div style="font-size:13px;color:#555;font-weight:600;">GSTIN: ${data.orgGst}</div>` : ""}
+      ${showGst && data.orgGst ? `<div style="font-size:13px;color:#555;font-weight:600;">GSTIN: ${data.orgGst}</div>` : ""}
     </div>
     <div style="text-align:right;">
-      <div class="invoice-title">TAX INVOICE</div>
+      <div class="invoice-title">${showGst ? "TAX INVOICE" : "INVOICE"}</div>
     </div>
   </div>
 
@@ -273,7 +282,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
 
   <table>
     <thead>
-      <tr><th>#</th><th>Item</th><th>Qty</th><th>Rate</th><th>GST</th><th>Amount</th></tr>
+      <tr><th>#</th><th>Item</th><th>Qty</th><th>Rate</th>${showGst ? "<th style='text-align:center;'>GST</th>" : ""}<th style="text-align:right;">Amount</th></tr>
     </thead>
     <tbody>${itemsRows}</tbody>
   </table>
@@ -281,8 +290,8 @@ export function generateInvoiceHTML(data: InvoiceData): string {
   <div class="totals">
     <table class="totals-table">
       <tr><td class="label">Subtotal</td><td class="value">Rs.${data.subtotal.toFixed(2)}</td></tr>
-      <tr><td class="label">CGST</td><td class="value">Rs.${data.cgst.toFixed(2)}</td></tr>
-      <tr><td class="label">SGST</td><td class="value">Rs.${data.sgst.toFixed(2)}</td></tr>
+      ${showGst ? `<tr><td class="label">CGST</td><td class="value">Rs.${data.cgst.toFixed(2)}</td></tr>
+      <tr><td class="label">SGST</td><td class="value">Rs.${data.sgst.toFixed(2)}</td></tr>` : ""}
       <tr class="grand-total"><td class="label">Total</td><td class="value">Rs.${data.total.toFixed(2)}</td></tr>
     </table>
   </div>
