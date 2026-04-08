@@ -118,14 +118,15 @@ export default function Menu() {
                     </div>
                     <div className="space-y-2">
                       <Label>GST Rate (%)</Label>
-                      <Select value={form.gst_rate} onValueChange={(v) => setForm({ ...form, gst_rate: v })}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="5">5%</SelectItem>
-                          <SelectItem value="12">12%</SelectItem>
-                          <SelectItem value="18">18%</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={form.gst_rate}
+                        onChange={(e) => setForm({ ...form, gst_rate: e.target.value })}
+                        placeholder="e.g. 5, 12, 18"
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">

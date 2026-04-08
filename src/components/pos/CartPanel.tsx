@@ -5,6 +5,7 @@ import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 interface CartPanelProps {
   items: CartItem[];
   totals: { subtotal: number; cgst: number; sgst: number; total: number };
+  applyGst?: boolean;
   onUpdateQuantity: (id: string, qty: number) => void;
   onRemoveItem: (id: string) => void;
   onCheckout: () => void;
