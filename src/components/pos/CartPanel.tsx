@@ -93,14 +93,18 @@ export default function CartPanel({
             <span>Subtotal</span>
             <span className="font-mono">₹{totals.subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>CGST</span>
-            <span className="font-mono">₹{totals.cgst.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>SGST</span>
-            <span className="font-mono">₹{totals.sgst.toFixed(2)}</span>
-          </div>
+          {applyGst && (
+            <>
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>CGST</span>
+                <span className="font-mono">₹{totals.cgst.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>SGST</span>
+                <span className="font-mono">₹{totals.sgst.toFixed(2)}</span>
+              </div>
+            </>
+          )}
           <div className="flex justify-between text-lg font-bold pt-2 border-t">
             <span>Total</span>
             <span className="font-mono text-primary">₹{totals.total.toFixed(2)}</span>
