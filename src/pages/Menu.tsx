@@ -98,7 +98,7 @@ export default function Menu() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Menu Management</h1>
           {canEdit && (
-            <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) { setEditing(null); setForm({ name: "", price: "", category: "Main Course", gst_rate: "5", is_available: true }); } }}>
+            <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) { setEditing(null); setForm({ name: "", price: "", category: "Main Course", gst_rate: "0", is_available: true }); } }}>
               <DialogTrigger asChild>
                 <Button><Plus className="h-4 w-4 mr-2" />Add Item</Button>
               </DialogTrigger>
