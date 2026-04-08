@@ -204,7 +204,7 @@ export default function Onboarding() {
               </div>
             </div>
             {duplicateOrgId && (
-              <div className="rounded-lg border-2 border-orange-500/50 bg-accent p-4 space-y-3">
+              <div className="rounded-lg border-2 border-destructive/50 bg-accent p-4 space-y-3">
                 <p className="text-sm font-medium text-accent-foreground">
                   An organization named "<span className="font-bold">{orgName}</span>" already exists.
                 </p>
