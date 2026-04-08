@@ -1,5 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.0";
-import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.100.0/cors";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -7,7 +11,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify the calling user is an admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -18,45 +21,40 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
 
-    // Verify caller with anon client
-    const anonClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    // Use service role client
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+    // Get caller ID from JWT
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsErr } = await anonClient.auth.getClaims(token);
-    if (claimsErr || !claimsData?.claims) {
+    const { data: { user: caller }, error: userErr } = await adminClient.auth.getUser(token);
+    if (userErr || !caller) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const callerUserId = claimsData.claims.sub as string;
 
-    // Use service role client for admin operations
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    // Get caller's org_id first
+    const { data: callerOrgId } = await adminClient.rpc("get_user_org_id", {
+      _user_id: caller.id,
+    });
+    if (!callerOrgId) {
+      return new Response(JSON.stringify({ error: "No organization found" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Check caller is admin
     const { data: isAdmin } = await adminClient.rpc("has_role", {
-      _user_id: callerUserId,
+      _user_id: caller.id,
       _role: "admin",
       _org_id: callerOrgId,
     });
     if (!isAdmin) {
       return new Response(JSON.stringify({ error: "Only admins can create users" }), {
         status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Get caller's org_id
-    const { data: callerOrgId } = await adminClient.rpc("get_user_org_id", {
-      _user_id: callerUserId,
-    });
-    if (!callerOrgId) {
-      return new Response(JSON.stringify({ error: "No organization found" }), {
-        status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -87,7 +85,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create user via admin API
+    // Create user — pass join_org_id so the handle_new_user trigger assigns the same org
     const { data: newUser, error: createErr } = await adminClient.auth.admin.createUser({
       email,
       password,
@@ -106,7 +104,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // The handle_new_user trigger creates profile + cashier role.
+    // The handle_new_user trigger creates profile + cashier role with the same org_id.
     // If the desired role is not cashier, update it.
     if (role !== "cashier") {
       await adminClient
