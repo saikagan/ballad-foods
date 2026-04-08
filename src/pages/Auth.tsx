@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +44,30 @@ export default function Auth() {
         ? prev.filter((v) => v !== value)
         : [...prev, value]
     );
+  };
+
+  const [forgotMode, setForgotMode] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error("Please enter your email");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Password reset link sent! Check your email.");
+      setForgotMode(false);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send reset link");
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
