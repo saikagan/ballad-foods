@@ -382,30 +382,18 @@ export type Database = {
           name: string
         }[]
       }
-      setup_onboarding:
-        | {
-            Args: {
-              _gst_number?: string
-              _industries?: Database["public"]["Enums"]["industry_type"][]
-              _industry: Database["public"]["Enums"]["industry_type"]
-              _org_id: string
-              _org_name: string
-              _phone?: string
-            }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              _gst_number?: string
-              _industries?: Database["public"]["Enums"]["industry_type"][]
-              _industry: Database["public"]["Enums"]["industry_type"]
-              _join_existing?: boolean
-              _org_id: string
-              _org_name: string
-              _phone?: string
-            }
-            Returns: undefined
-          }
+      setup_onboarding: {
+        Args: {
+          _gst_number?: string
+          _industries?: Database["public"]["Enums"]["industry_type"][]
+          _industry: Database["public"]["Enums"]["industry_type"]
+          _join_existing?: boolean
+          _org_id: string
+          _org_name: string
+          _phone?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "manager" | "cashier" | "normal_staff"
