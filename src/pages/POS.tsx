@@ -114,6 +114,7 @@ export default function POS() {
         customerName: selectedCustomer?.name || null,
         customerPhone: selectedCustomer?.phone || null,
         customerEmail: selectedCustomer?.email || null,
+        applyGst,
         items: items.map((it) => ({
           name: it.name,
           quantity: it.quantity,
