@@ -78,7 +78,7 @@ export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceAc
   );
 }
 
-function buildShareMessage(data: InvoiceData, invoiceUrl?: string): string {
+function buildShareMessage(data: InvoiceData): string {
   const showGst = data.applyGst !== false;
   const itemLines = data.items
     .map((it) => `  ${it.name} × ${it.quantity} = ₹${it.total.toFixed(0)}`)
@@ -106,10 +106,6 @@ Payment: ${data.paymentMethod.toUpperCase()}
 Status: ✅ Paid
 
 Thank you for your business!`;
-
-  if (invoiceUrl) {
-    msg += `\n\n📄 Download Invoice: ${invoiceUrl}`;
-  }
 
   return msg;
 }
