@@ -28,30 +28,13 @@ export default function InvoiceActions({ open, onClose, invoiceData, invoiceStor
     }
   };
 
-  const handleWhatsApp = async () => {
-    setSharing(true);
-    try {
-      let invoiceUrl = "";
-      if (invoiceStoragePath) {
-        const { data, error } = await supabase.storage
-          .from("invoices")
-          .createSignedUrl(invoiceStoragePath, 7 * 24 * 60 * 60); // 7 days
-        if (!error && data?.signedUrl) {
-          invoiceUrl = data.signedUrl;
-        }
-      }
-
-      const message = buildShareMessage(invoiceData, invoiceUrl);
-      const phone = invoiceData.customerPhone?.replace(/\D/g, "") || "";
-      const url = phone
-        ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
-        : `https://wa.me/?text=${encodeURIComponent(message)}`;
-      window.open(url, "_blank");
-    } catch {
-      toast.error("Failed to generate invoice link");
-    } finally {
-      setSharing(false);
-    }
+  const handleWhatsApp = () => {
+    const message = buildShareMessage(invoiceData);
+    const phone = invoiceData.customerPhone?.replace(/\D/g, "") || "";
+    const url = phone
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
   };
 
   const handleEmail = () => {
