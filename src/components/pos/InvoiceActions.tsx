@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Printer, MessageCircle, Mail, Check, Loader2 } from "lucide-react";
+import { Printer, MessageCircle, Mail, Check } from "lucide-react";
 import type { InvoiceData } from "@/lib/generateInvoice";
 import { openInvoicePrintWindow } from "@/lib/generateInvoice";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 interface InvoiceActionsProps {
   open: boolean;
@@ -14,8 +11,7 @@ interface InvoiceActionsProps {
   invoiceStoragePath?: string | null;
 }
 
-export default function InvoiceActions({ open, onClose, invoiceData, invoiceStoragePath }: InvoiceActionsProps) {
-  const [sharing, setSharing] = useState(false);
+export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceActionsProps) {
 
   if (!invoiceData) return null;
 
