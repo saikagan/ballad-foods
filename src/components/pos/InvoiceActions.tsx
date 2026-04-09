@@ -61,8 +61,8 @@ export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceAc
           <Button onClick={handlePrint} variant="outline" className="h-12 justify-start gap-3">
             <Printer className="h-5 w-5" /> Print / Save as PDF
           </Button>
-          <Button onClick={handleWhatsApp} disabled={sharing} variant="outline" className="h-12 justify-start gap-3 text-green-600 hover:text-green-700 hover:bg-green-50">
-            {sharing ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
+          <Button onClick={handleWhatsApp} variant="outline" className="h-12 justify-start gap-3 text-green-600 hover:text-green-700 hover:bg-green-50">
+            <MessageCircle className="h-5 w-5" />
             Share via WhatsApp
           </Button>
           <Button onClick={handleEmail} variant="outline" className="h-12 justify-start gap-3">
