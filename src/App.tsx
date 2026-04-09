@@ -21,6 +21,7 @@ const queryClient = new QueryClient();
 function AppRoutes() {
   const { user, loading, orgId, hasRole } = useAuth();
   const isAdmin = hasRole("admin");
+  const canAccessMenu = isAdmin || hasRole("manager") || hasRole("cashier");
 
   if (loading) {
     return (
@@ -59,7 +60,7 @@ function AppRoutes() {
       <Route path="/orders" element={<Orders />} />
       <Route path="/customers" element={<Customers />} />
       {/* Admin-only routes */}
-      <Route path="/menu" element={isAdmin ? <Menu /> : <Navigate to="/" replace />} />
+      <Route path="/menu" element={canAccessMenu ? <Menu /> : <Navigate to="/" replace />} />
       <Route path="/analytics" element={isAdmin ? <Analytics /> : <Navigate to="/" replace />} />
       <Route path="/settings" element={isAdmin ? <SettingsPage /> : <Navigate to="/" replace />} />
       <Route path="/reset-password" element={<ResetPassword />} />

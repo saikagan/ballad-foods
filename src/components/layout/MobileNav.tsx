@@ -14,8 +14,12 @@ export default function MobileNav() {
   const { pathname } = useLocation();
   const { hasRole } = useAuth();
   const isAdmin = hasRole("admin");
+  const canAccessMenu = isAdmin || hasRole("manager") || hasRole("cashier");
 
-  const visibleItems = mobileNav.filter((item) => !item.adminOnly || isAdmin);
+  const visibleItems = mobileNav.filter((item) => {
+    if (item.path === "/menu") return canAccessMenu;
+    return !item.adminOnly || isAdmin;
+  });
 
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card border-t z-50">
