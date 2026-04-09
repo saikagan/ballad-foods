@@ -129,7 +129,7 @@ Status: ✅ Paid
 Thank you for your business!`;
 
   if (invoiceUrl) {
-    msg += `\n\n📄 View Invoice: ${invoiceUrl}`;
+    msg += `\n\n📄 Download Invoice: ${invoiceUrl}`;
   }
 
   return msg;

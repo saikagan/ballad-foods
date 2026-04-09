@@ -168,7 +168,7 @@ export default function POS() {
         </div>
 
         {/* Cart Sidebar */}
-        <div className="hidden md:flex w-[380px] p-4 pl-0">
+        <div className="hidden md:flex w-[340px] shrink-0 p-4 pl-0">
           <CartPanel
             items={items}
             totals={totals}
