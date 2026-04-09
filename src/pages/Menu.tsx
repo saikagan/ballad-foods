@@ -21,7 +21,8 @@ export default function Menu() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ name: "", price: "", category: "Main Course", gst_rate: "0", is_available: true });
-  const canEdit = hasRole("admin") || hasRole("manager");
+  const canManage = hasRole("admin") || hasRole("manager") || hasRole("cashier");
+  const canDelete = hasRole("admin");
 
   const { data: items = [] } = useQuery({
     queryKey: ["menu_items", orgId],
@@ -97,7 +98,7 @@ export default function Menu() {
       <div className="p-4 md:p-6 max-w-5xl">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Menu Management</h1>
-          {canEdit && (
+          {canManage && (
             <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) { setEditing(null); setForm({ name: "", price: "", category: "Main Course", gst_rate: "0", is_available: true }); } }}>
               <DialogTrigger asChild>
                 <Button><Plus className="h-4 w-4 mr-2" />Add Item</Button>
@@ -171,14 +172,16 @@ export default function Menu() {
                     <span className={`text-xs px-2 py-0.5 rounded-full ${item.is_available ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
                       {item.is_available ? "Available" : "Unavailable"}
                     </span>
-                    {canEdit && (
+                     {canManage && (
                       <div className="flex gap-1">
                         <button onClick={() => openEdit(item)} className="p-2 rounded-md hover:bg-secondary transition-colors">
                           <Pencil className="h-4 w-4 text-muted-foreground" />
                         </button>
-                        <button onClick={() => deleteMutation.mutate(item.id)} className="p-2 rounded-md hover:bg-destructive/10 transition-colors">
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </button>
+                         {canDelete && (
+                           <button onClick={() => deleteMutation.mutate(item.id)} className="p-2 rounded-md hover:bg-destructive/10 transition-colors">
+                             <Trash2 className="h-4 w-4 text-destructive" />
+                           </button>
+                         )}
                       </div>
                     )}
                   </Card>

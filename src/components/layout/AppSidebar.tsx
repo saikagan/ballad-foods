@@ -26,8 +26,12 @@ export default function AppSidebar() {
   const { pathname } = useLocation();
   const { signOut, profile, hasRole } = useAuth();
   const isAdmin = hasRole("admin");
+  const canAccessMenu = isAdmin || hasRole("manager") || hasRole("cashier");
 
-  const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
+  const visibleItems = navItems.filter((item) => {
+    if (item.path === "/menu") return canAccessMenu;
+    return !item.adminOnly || isAdmin;
+  });
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex-shrink-0">

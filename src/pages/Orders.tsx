@@ -142,7 +142,7 @@ export default function Orders() {
             </Button>
           )}
 
-          {showDone && (
+          {showDone && order.status === "paid" && (
             <Button
               size="sm"
               className="h-7 gap-1.5 text-xs"
@@ -188,7 +188,7 @@ export default function Orders() {
           <TabsContent value="week" className="space-y-3 mt-4">
             {weekOrders.length === 0
               ? emptyState("No orders in the last 7 days.")
-              : weekOrders.map((o) => renderOrder(o))}
+              : weekOrders.map((o) => renderOrder(o, o.status === "paid"))}
           </TabsContent>
 
           <TabsContent value="completed" className="space-y-3 mt-4">
