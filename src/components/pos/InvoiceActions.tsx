@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Printer, MessageCircle, Mail, Check } from "lucide-react";
 import type { InvoiceData } from "@/lib/generateInvoice";
 import { openInvoicePrintWindow } from "@/lib/generateInvoice";
+import { supabase } from "@/integrations/supabase/client";
 
 interface InvoiceActionsProps {
   open: boolean;
@@ -11,9 +12,22 @@ interface InvoiceActionsProps {
   invoiceStoragePath?: string | null;
 }
 
-export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceActionsProps) {
+export default function InvoiceActions({ open, onClose, invoiceData, invoiceStoragePath }: InvoiceActionsProps) {
 
   if (!invoiceData) return null;
+
+  const getInvoiceUrl = async (): Promise<string | undefined> => {
+    if (!invoiceStoragePath) return undefined;
+    try {
+      const { data, error } = await supabase.storage
+        .from("invoices")
+        .createSignedUrl(invoiceStoragePath, 604800);
+      if (error || !data?.signedUrl) return undefined;
+      return data.signedUrl;
+    } catch {
+      return undefined;
+    }
+  };
 
   const handlePrint = () => {
     const w = openInvoicePrintWindow(invoiceData);
@@ -24,8 +38,9 @@ export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceAc
     }
   };
 
-  const handleWhatsApp = () => {
-    const message = buildShareMessage(invoiceData);
+  const handleWhatsApp = async () => {
+    const invoiceUrl = await getInvoiceUrl();
+    const message = buildShareMessage(invoiceData, invoiceUrl);
     const phone = invoiceData.customerPhone?.replace(/\D/g, "") || "";
     const url = phone
       ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
@@ -78,7 +93,7 @@ export default function InvoiceActions({ open, onClose, invoiceData }: InvoiceAc
   );
 }
 
-function buildShareMessage(data: InvoiceData): string {
+function buildShareMessage(data: InvoiceData, invoiceUrl?: string): string {
   const showGst = data.applyGst !== false;
   const itemLines = data.items
     .map((it) => `  ${it.name} × ${it.quantity} = ₹${it.total.toFixed(0)}`)
@@ -106,6 +121,10 @@ Payment: ${data.paymentMethod.toUpperCase()}
 Status: ✅ Paid
 
 Thank you for your business!`;
+
+  if (invoiceUrl) {
+    msg += `\n\n📄 Download Invoice: ${invoiceUrl}`;
+  }
 
   return msg;
 }
