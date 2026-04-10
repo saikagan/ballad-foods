@@ -50,7 +50,7 @@ export default function Orders() {
       if (phone) {
         const surveyLink = "https://docs.google.com/forms/d/1G3e0cOyKYu4ttPYRKZbTB6Oq86FloVxcBfgt4z39w3s/edit";
         const message = encodeURIComponent(
-          `Thank you for your order! Please rate us: ${surveyLink}`
+          `Your order number ${order.order_number} is ready. Thank you for your purchase! Please rate us: ${surveyLink}`
         );
         window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
       }
