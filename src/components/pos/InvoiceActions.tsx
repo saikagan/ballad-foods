@@ -128,18 +128,3 @@ Thank you for your business!`;
 
   return msg;
 }
-
-  if (showGst) {
-    msg += `\nCGST: ₹${data.cgst.toFixed(2)}`;
-    msg += `\nSGST: ₹${data.sgst.toFixed(2)}`;
-  }
-
-  msg += `\n*Total: ₹${data.total.toFixed(2)}*
-
-Payment: ${data.paymentMethod.toUpperCase()}
-Status: ✅ Paid
-
-Thank you for your business!`;
-
-  return msg;
-}
