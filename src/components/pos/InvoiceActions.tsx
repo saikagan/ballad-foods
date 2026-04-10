@@ -93,7 +93,7 @@ export default function InvoiceActions({ open, onClose, invoiceData, invoiceStor
   );
 }
 
-function buildShareMessage(data: InvoiceData): string {
+function buildShareMessage(data: InvoiceData, invoiceUrl?: string): string {
   const showGst = data.applyGst !== false;
   const itemLines = data.items
     .map((it) => `  ${it.name} × ${it.quantity} = ₹${it.total.toFixed(0)}`)
@@ -109,6 +109,25 @@ ${data.customerName ? `Customer: ${data.customerName}` : "Walk-in Customer"}
 ${itemLines}
 
 Subtotal: ₹${data.subtotal.toFixed(2)}`;
+
+  if (showGst) {
+    msg += `\nCGST: ₹${data.cgst.toFixed(2)}`;
+    msg += `\nSGST: ₹${data.sgst.toFixed(2)}`;
+  }
+
+  msg += `\n*Total: ₹${data.total.toFixed(2)}*
+
+Payment: ${data.paymentMethod.toUpperCase()}
+Status: ✅ Paid
+
+Thank you for your business!`;
+
+  if (invoiceUrl) {
+    msg += `\n\n📄 Download Invoice: ${invoiceUrl}`;
+  }
+
+  return msg;
+}
 
   if (showGst) {
     msg += `\nCGST: ₹${data.cgst.toFixed(2)}`;
